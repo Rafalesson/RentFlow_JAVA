@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title>Painel Operacional | RentFlow</title>
+</head>
+<body>
+    <main layout:fragment="content">
+        
+        <!-- Header da Página -->
+        <div class="row mb-3 align-items-center">
+            <div class="col-lg-12">
+                <h1 class="page-header-title mb-1">Painel Operacional</h1>
+                <p class="page-header-subtitle">Acompanhe as métricas do RentFlow em tempo real</p>
+            </div>
+        </div>
+
+        <!-- Linha com 6 Cards de Métricas -->
+        <div class="row g-3 mb-3">
+            <!-- Card 1: Frota Total -->
+            <div class="col-md-4 col-lg-2">
+                <div class="glass-card p-3 h-100 text-start d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-secondary small fw-bold text-uppercase d-block mb-1">Frota Total</span>
+                        <h2 class="fw-bold mb-0 fs-3" th:text="${frotaTotal}">0</h2>
+                    </div>
+                    <div class="text-primary bg-primary bg-opacity-10 p-2 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:36px; height:36px;">
+                        <i class="bi bi-car-front-fill fs-5"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Disponíveis -->
+            <div class="col-md-4 col-lg-2">
+                <div class="glass-card p-3 h-100 text-start d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-success small fw-bold text-uppercase d-block mb-1">Disponíveis</span>
+                        <h2 class="fw-bold mb-0 fs-3 text-success" th:text="${veiculosDisponiveis}">0</h2>
+                    </div>
+                    <div class="text-success bg-success bg-opacity-10 p-2 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:36px; height:36px;">
+                        <i class="bi bi-check-circle-fill fs-5"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Locados -->
+            <div class="col-md-4 col-lg-2">
+                <div class="glass-card p-3 h-100 text-start d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-info small fw-bold text-uppercase d-block mb-1">Locados</span>
+                        <h2 class="fw-bold mb-0 fs-3" th:text="${veiculosLocados}">0</h2>
+                    </div>
+                    <div class="text-info bg-info bg-opacity-10 p-2 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:36px; height:36px;">
+                        <i class="bi bi-key-fill fs-5"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4: Oficina -->
+            <div class="col-md-4 col-lg-2">
+                <div class="glass-card p-3 h-100 text-start d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-warning small fw-bold text-uppercase d-block mb-1">Oficina</span>
+                        <h2 class="fw-bold mb-0 fs-3" th:text="${emManutencao}">0</h2>
+                    </div>
+                    <div class="text-warning bg-warning bg-opacity-10 p-2 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:36px; height:36px;">
+                        <i class="bi bi-tools fs-5"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 5: Inadimplentes -->
+            <div class="col-md-4 col-lg-2">
+                <div class="glass-card p-3 h-100 text-start d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-danger small fw-bold text-uppercase d-block mb-1">Inadimplentes</span>
+                        <h2 class="fw-bold mb-0 fs-3" th:text="${inadimplentesTotal}">0</h2>
+                    </div>
+                    <div class="text-danger bg-danger bg-opacity-10 p-2 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:36px; height:36px;">
+                        <i class="bi bi-person-x-fill fs-5"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 6: Ativos -->
+            <div class="col-md-4 col-lg-2">
+                <div class="glass-card p-3 h-100 text-start d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-secondary small fw-bold text-uppercase d-block mb-1" style="color: #c084fc !important;">Ativos</span>
+                        <h2 class="fw-bold mb-0 fs-3" th:text="${ativosTotal}">0</h2>
+                    </div>
+                    <div class="bg-opacity-10 p-2 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:36px; height:36px; background-color: rgba(168, 85, 247, 0.1); color: #c084fc;">
+                        <i class="bi bi-file-text-fill fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela: Últimas Locações Registradas -->
+        <div class="glass-card p-3 p-md-4">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="d-flex align-items-center">
+                    <div class="text-primary bg-primary bg-opacity-10 p-2 rounded-circle me-3 d-flex align-items-center justify-content-center" style="width:36px; height:36px;">
+                        <i class="bi bi-journal-text fs-5"></i>
+                    </div>
+                    <h4 class="mb-0 text-white fw-bold fs-5">Últimas Locações Registradas</h4>
+                </div>
+                <a th:href="@{/}" class="btn btn-outline-secondary btn-sm px-3 py-2 rounded-2 d-flex align-items-center">
+                    <i class="bi bi-arrow-clockwise me-2"></i> Atualizar Dados
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-dark-custom table-hover align-middle mb-0 text-start">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Cliente (CPF)</th>
+                            <th>Veículo (Placa)</th>
+                            <th>Data Reserva</th>
+                            <th>Devolução Prevista</th>
+                            <th>Status</th>
+                            <th class="text-end">Valor Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="locacao : ${recentesLocacoes}" class="linha-clicavel" data-detalhes-tipo="locacao" th:data-detalhes-id="${locacao.idLoc}">
+                            <td class="font-monospace text-secondary fs-6" th:text="${'#' + locacao.idLoc}">#1</td>
+                            <td th:text="${locacao.cliente?.cpf}">111.111.111-11</td>
+                            <td class="font-monospace text-danger text-uppercase" th:text="${locacao.veiculo?.placa}">ABC1023</td>
+                            <td th:text="${locacao.dataReserva != null ? #temporals.format(locacao.dataReserva, 'dd/MM/yyyy') : '-'}">01/06/2026</td>
+                            <td th:text="${locacao.dataDevolPrevista != null ? #temporals.format(locacao.dataDevolPrevista, 'dd/MM/yyyy') : '-'}">04/06/2026</td>
+                            <td>
+                                <!-- Badges customizados como no print do React -->
+                                <span class="badge rounded-pill px-3 py-2 text-uppercase font-monospace"
+                                      th:style="${locacao.status.name() == 'ENCERRADA' ? 'background: #e2e8f0; color: #1e293b; font-weight: 700;' : 
+                                                 (locacao.status.name() == 'CANCELADA' ? 'background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4);' : 
+                                                 (locacao.status.name() == 'ATIVA' ? 'background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);' : 
+                                                 'background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4);'))}"
+                                      th:text="${locacao.status.label}">ENCERRADA</span>
+                            </td>
+                            <td class="text-end fw-bold" 
+                                th:classappend="${locacao.status.name() == 'CANCELADA' ? 'text-secondary' : 'text-success'}"
+                                th:text="${locacao.status.name() == 'CANCELADA' ? '-' : ('R$ ' + #numbers.formatDecimal(locacao.valorTotal != null ? locacao.valorTotal : 0.0, 1, 'POINT', 2, 'COMMA'))}">
+                                R$ 285,00
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(recentesLocacoes)}">
+                            <td colspan="7" class="text-center py-5 text-secondary">
+                                <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                Nenhuma locação recente registrada.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- JavaScript local para paginação das locações -->
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const table = document.querySelector('table');
+                if (table) {
+                    window.paginateTable(table, 5);
+                }
+            });
+        </script>
+
+    </main>
+</body>
+</html>

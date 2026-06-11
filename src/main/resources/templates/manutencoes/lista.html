@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title>Manutenções | RentFlow</title>
+</head>
+<body>
+    <main layout:fragment="content">
+        
+        <!-- Header da Página -->
+        <div class="d-flex justify-content-between align-items-center mb-4 text-start">
+            <div>
+                <h1 class="page-header-title mb-1">Manutenções</h1>
+                <p class="page-header-subtitle">Controle de reparos, revisões e custos com a frota</p>
+            </div>
+            <!-- Enviar Veículo Triggers Modal -->
+            <button type="button" class="btn btn-primary-custom d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#enviarVeiculoModal">
+                <i class="bi bi-wrench-adjustable me-2"></i> Enviar Veículo
+            </button>
+        </div>
+
+        <!-- Alertas de Flash Messages -->
+        <div th:if="${successMessage}" class="alert alert-success-custom alert-dismissible fade show mb-4 text-start" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                <span th:text="${successMessage}">Ação concluída com sucesso!</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger-custom alert-dismissible fade show mb-4 text-start" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                <span th:text="${errorMessage}">Erro ao processar manutenção.</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Painel de Filtros Integrado -->
+        <div class="glass-card p-3 mb-4">
+            <form method="GET" th:action="@{/manutencoes}" id="filtroManutencoesForm">
+                <div class="row g-3 align-items-end text-start">
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small fw-bold mb-2">Pesquisar</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-search input-icon" style="top:50%; transform:translateY(-50%); left:16px;"></i>
+                            <input type="text" id="buscaInput" name="busca" th:value="${param.busca != null ? param.busca[0] : ''}" class="form-control-custom auto-submit" style="padding-top:10px; padding-bottom:10px;" placeholder="Buscar por placa, motivo...">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-secondary small fw-bold mb-2">Filtrar por Status</label>
+                        <select name="status" onchange="this.form.submit()" class="form-select form-control-custom" style="padding-top:10px; padding-bottom:10px; padding-left:16px; background-image:none;">
+                            <option value="" th:selected="${param.status == null || param.status[0] == ''}">Todos os Status</option>
+                            <option value="EM_ANDAMENTO" th:selected="${param.status != null && param.status[0] == 'EM_ANDAMENTO'}">Em Andamento</option>
+                            <option value="CONCLUIDA" th:selected="${param.status != null && param.status[0] == 'CONCLUIDA'}">Concluída</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-secondary small fw-bold mb-2">Filtrar por Tipo</label>
+                        <select name="tipo" onchange="this.form.submit()" class="form-select form-control-custom" style="padding-top:10px; padding-bottom:10px; padding-left:16px; background-image:none;">
+                            <option value="" th:selected="${param.tipo == null || param.tipo[0] == ''}">Todos os Tipos</option>
+                            <option value="PREVENTIVA" th:selected="${param.tipo != null && param.tipo[0] == 'PREVENTIVA'}">Preventiva</option>
+                            <option value="CORRETIVA" th:selected="${param.tipo != null && param.tipo[0] == 'CORRETIVA'}">Corretiva</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-outline-secondary text-white w-100 py-2 rounded-2 d-flex align-items-center justify-content-center" style="height:46px;">
+                                <i class="bi bi-arrow-clockwise me-2"></i> Atualizar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabela de Manutenções -->
+        <div class="glass-card p-4">
+            <div class="table-responsive">
+                <table class="table table-dark-custom table-hover align-middle mb-0 text-start">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Veículo</th>
+                            <th>Responsável</th>
+                            <th class="text-center">Tipo</th>
+                            <th>Motivo</th>
+                            <th>Entrada / Prev. Saída</th>
+                            <th>Data Saída</th>
+                            <th>Custo</th>
+                            <th sec:authorize="hasRole('GERENTE')" class="text-acoes-col">Ações</th>
+                            <th sec:authorize="!hasRole('GERENTE')" th:if="${#lists.toList(manutencoes).?[dataSaidaReal == null].size() > 0}" class="text-acoes-col">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="manutencao : ${manutencoes}" class="linha-clicavel" data-detalhes-tipo="manutencao" th:data-detalhes-id="${manutencao.idManut}">
+                            <td class="font-monospace text-danger fw-bold fs-6" th:text="${'#' + manutencao.idManut}">#1</td>
+                            <td>
+                                <div class="fw-bold text-white fs-6" th:text="${manutencao.veiculo?.marca + ' ' + manutencao.veiculo?.modelo}">Fiat Uno</div>
+                                <div class="small font-monospace text-danger text-uppercase" th:text="${'Placa: ' + manutencao.veiculo?.placa}">Placa: JKL4G56</div>
+                            </td>
+                            <td th:text="${manutencao.funcionario?.nome}">Ricardo Alves</td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill px-3 py-2 text-uppercase font-monospace"
+                                      th:style="${manutencao.tipo.name() == 'CORRETIVA' ? 'background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);' : 
+                                                 'background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3);'}"
+                                      th:text="${manutencao.tipo.label}">CORRETIVA</span>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-white mb-1" th:text="${manutencao.motivo}">Superaquecimento do motor</div>
+                                <div class="small text-secondary-custom text-truncate" style="max-width: 250px;" th:text="${manutencao.descricao}">Aguardando diagnóstico.</div>
+                            </td>
+                            <td>
+                                <div class="small text-secondary-custom">
+                                    <span>E: </span>
+                                    <span class="text-white" th:text="${manutencao.dataEntrada != null ? #temporals.format(manutencao.dataEntrada, 'dd/MM/yyyy') : '-'}">02/06/2026</span>
+                                </div>
+                                <div class="small text-secondary-custom">
+                                    <span>P: </span>
+                                    <span class="text-white" th:text="${manutencao.previsaoSaida != null ? #temporals.format(manutencao.previsaoSaida, 'dd/MM/yyyy') : '-'}">09/06/2026</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="text-success fw-bold" th:if="${manutencao.dataSaidaReal != null}" th:text="${#temporals.format(manutencao.dataSaidaReal, 'dd/MM/yyyy')}">09/06/2026</span>
+                                <span class="text-secondary" th:if="${manutencao.dataSaidaReal == null}">-</span>
+                            </td>
+                            <td class="fw-bold text-white" 
+                                th:text="${manutencao.custo != null ? 'R$ ' + #numbers.formatDecimal(manutencao.custo, 1, 'POINT', 2, 'COMMA') : '-'}">
+                                R$ 399,00
+                            </td>
+                            <td sec:authorize="hasRole('GERENTE')" class="text-acoes-col">
+                                <button th:if="${manutencao.dataSaidaReal == null}" type="button" class="btn btn-sm btn-outline-success me-1 px-3 py-1 rounded-2" data-bs-toggle="modal" th:data-bs-target="${'#concluirModal' + manutencao.idManut}">
+                                    <i class="bi bi-check2-circle me-1"></i> Concluir
+                                </button>
+                                <!-- Exclusão (Restrito a GERENTE) -->
+                                <button type="button" class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" style="width:32px; height:32px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color:#f87171;" title="Remover Histórico" data-bs-toggle="modal" th:data-bs-target="${'#modalExcluirManutencao' + manutencao.idManut}">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </td>
+                            <td sec:authorize="!hasRole('GERENTE')" th:if="${#lists.toList(manutencoes).?[dataSaidaReal == null].size() > 0}" class="text-acoes-col">
+                                <button th:if="${manutencao.dataSaidaReal == null}" type="button" class="btn btn-sm btn-outline-success me-1 px-3 py-1 rounded-2" data-bs-toggle="modal" th:data-bs-target="${'#concluirModal' + manutencao.idManut}">
+                                    <i class="bi bi-check2-circle me-1"></i> Concluir
+                                </button>
+                                <span th:if="${manutencao.dataSaidaReal != null}" class="text-secondary small me-2">-</span>
+                            </td>
+
+                            <!-- Hidden cell just to hold the modals safely and avoid validation warnings/duplication -->
+                            <td style="display: none;">
+                                <!-- Modal Confirmar Exclusão Manutenção -->
+                                <div sec:authorize="hasRole('GERENTE')" class="modal fade" th:id="${'modalExcluirManutencao' + manutencao.idManut}" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header border-bottom-0 pb-0">
+                                                <h5 class="modal-title text-danger d-flex align-items-center fw-bold">
+                                                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirmar Exclusão
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body pt-4 text-start">
+                                                <p class="mb-4">Tem certeza de que deseja excluir este histórico de manutenção?</p>
+                                                <div class="p-3 rounded-3 mb-4" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);">
+                                                    <div class="fw-bold fs-6 mb-1">Veículo: <span th:text="${manutencao.veiculo != null ? manutencao.veiculo.modelo + ' (' + manutencao.veiculo.placa + ')' : '-'}"></span></div>
+                                                    <div class="fw-bold fs-6" style="color: #e11d48;">Tipo: <span th:text="${manutencao.tipo != null ? manutencao.tipo.name() : '-'}"></span></div>
+                                                </div>
+                                                <p class="text-secondary-custom small mb-0">Esta ação removerá permanentemente o registro do sistema.</p>
+                                            </div>
+                                            <div class="modal-footer border-top-0 pt-0">
+                                                <button type="button" class="btn btn-cancel-custom" data-bs-dismiss="modal">Voltar</button>
+                                                <a th:href="@{/manutencoes/excluir/{id}(id=${manutencao.idManut})}" class="btn btn-danger px-4 rounded-2">Confirmar Exclusão</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ======================= MODAL: CONCLUIR MANUTENÇÃO ======================= -->
+                                <div class="modal fade" th:id="${'concluirModal' + manutencao.idManut}" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <form th:action="@{/manutencoes/concluir/{id}(id=${manutencao.idManut})}" method="POST">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title text-white fw-bold"><i class="bi bi-check2-circle-fill text-success me-2"></i>Concluir Ordem de Serviço</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body text-start">
+                                                    <p class="text-white small mb-3">Você está registrando a conclusão e a liberação da manutenção do veículo <strong th:text="${manutencao.veiculo?.marca + ' ' + manutencao.veiculo?.modelo}">Gol</strong> (Placa: <span th:text="${manutencao.veiculo?.placa}">ABC1023</span>).</p>
+                                                    <div class="mb-3">
+                                                        <label class="form-label-custom mb-1">Custo Total dos Reparos (R$)</label>
+                                                        <div class="input-group input-group-custom number-input-group">
+                                                            <button class="btn btn-outline-secondary btn-number" type="button" data-action="minus"><i class="bi bi-dash"></i></button>
+                                                            <input type="number" step="0.01" name="custo" class="form-control-custom text-center" placeholder="0.00" required>
+                                                            <button class="btn btn-outline-secondary btn-number" type="button" data-action="plus"><i class="bi bi-plus"></i></button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-cancel-custom" data-bs-dismiss="modal">Cancelar</button>
+                                                    <button type="submit" class="btn btn-success px-4 text-white">Concluir Manutenção</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(manutencoes)}">
+                            <td sec:authorize="hasRole('GERENTE')" colspan="9" class="text-center py-5 text-secondary">
+                                <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                Nenhuma ordem de manutenção encontrada.
+                            </td>
+                            <td sec:authorize="!hasRole('GERENTE')" colspan="8" class="text-center py-5 text-secondary">
+                                <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                Nenhuma ordem de manutenção encontrada.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ======================= MODAL: ENVIAR VEÍCULO PARA OFICINA (WIZARD) ======================= -->
+        <div class="modal fade wizard-modal" id="enviarVeiculoModal" tabindex="-1" aria-labelledby="enviarVeiculoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content wizard-card text-start">
+                    <form th:action="@{/manutencoes/salvar}" method="POST">
+                        <div class="modal-body p-4">
+                            <!-- Wizard Header -->
+                            <div class="wizard-header">
+                                <h5 class="wizard-header-title">Enviar Veículo para Oficina</h5>
+                                <span class="wizard-step-badge">Passo 1 de 2</span>
+                            </div>
+
+                            <!-- PASSO 1: Selecionar Veículo & Tipo -->
+                            <div class="wizard-step active">
+                                <div class="wizard-step-title">
+                                    <i class="bi bi-car-front-fill"></i> Passo 1: Veículo &amp; Tipo de Serviço
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom mb-1">Selecione o Veículo</label>
+                                        <select name="placaVeiculo" class="form-select form-control-custom" style="padding: 10px 16px 10px 16px!important; background-image:none;" required>
+                                            <option value="">Escolha o veículo...</option>
+                                            <option th:each="vei : ${veiculosDisponiveis}" th:value="${vei.placa}" th:text="${vei.marca + ' ' + vei.modelo + ' (Placa: ' + vei.placa + ')'}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom mb-1">Tipo de Manutenção</label>
+                                        <select name="tipo" class="form-select form-control-custom" style="padding: 10px 16px 10px 16px!important; background-image:none;" required>
+                                            <option th:each="t : ${tiposManutencao}" th:value="${t.name()}" th:text="${t.label}">Corretiva</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PASSO 2: Detalhes do Serviço -->
+                            <div class="wizard-step">
+                                <div class="wizard-step-title">
+                                    <i class="bi bi-wrench-adjustable"></i> Passo 2: Detalhes do Serviço
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom mb-1">Motivo Principal</label>
+                                        <input type="text" name="motivo" class="form-control-custom" style="padding: 10px 16px!important;" placeholder="Ex: Vazamento de óleo, Barulho na suspensão" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom mb-1">Previsão de Conclusão / Saída</label>
+                                        <input type="date" name="previsaoSaida" class="form-control-custom" style="padding: 10px 16px!important;" required>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="form-label-custom mb-1">Descrição Detalhada</label>
+                                        <textarea name="descricao" class="form-control-custom" style="padding: 10px 16px!important; height: 100px; resize:none;" placeholder="Descreva os sintomas relatados ou peças a serem avaliadas..." required></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Wizard Footer -->
+                            <div class="wizard-footer">
+                                <button type="button" class="wizard-btn-back"><i class="bi bi-arrow-left"></i> Voltar</button>
+                                <div class="wizard-footer-right">
+                                    <button type="button" class="wizard-btn-cancel" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="button" class="wizard-btn-next">Avançar <i class="bi bi-arrow-right"></i></button>
+                                    <button type="submit" class="wizard-btn-submit">Enviar para Oficina <i class="bi bi-wrench-adjustable"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Script local para paginação das manutenções -->
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const table = document.querySelector('table');
+                if (table) {
+                    window.paginateTable(table, 8);
+                }
+            });
+        </script>
+    </main>
+</body>
+</html>

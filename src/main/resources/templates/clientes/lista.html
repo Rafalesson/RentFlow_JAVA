@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title>Clientes | RentFlow</title>
+</head>
+<body>
+    <main layout:fragment="content">
+        
+        <!-- Header da Página -->
+        <div class="d-flex justify-content-between align-items-center mb-4 text-start">
+            <div>
+                <h1 class="page-header-title mb-1">Clientes</h1>
+                <p class="page-header-subtitle">Gerencie o cadastro de clientes da locadora</p>
+            </div>
+            <!-- Novo Cliente Triggers Modal -->
+            <button type="button" class="btn btn-primary-custom d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#novoClienteModal">
+                <i class="bi bi-person-plus-fill me-2"></i> Novo Cliente
+            </button>
+        </div>
+
+        <!-- Alertas de Flash Messages -->
+        <div th:if="${successMessage}" class="alert alert-success-custom alert-dismissible fade show mb-4 text-start" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                <span th:text="${successMessage}">Ação concluída com sucesso!</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger-custom alert-dismissible fade show mb-4 text-start" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                <span th:text="${errorMessage}">Erro na operação.</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Painel de Filtros Integrado ao Backend -->
+        <div class="glass-card p-3 mb-4">
+            <form method="GET" th:action="@{/clientes}" id="filtroClientesForm">
+                <div class="row g-3 align-items-end text-start">
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small fw-bold mb-2">Pesquisar</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-search input-icon" style="top:50%; transform:translateY(-50%); left:16px;"></i>
+                            <input type="text" id="buscaInput" name="busca" th:value="${param.busca != null ? param.busca[0] : ''}" class="form-control-custom auto-submit" style="padding-top:10px; padding-bottom:10px;" placeholder="Buscar por nome ou CPF...">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small fw-bold mb-2">Filtrar por Status</label>
+                        <select name="inadimplente" onchange="this.form.submit()" class="form-select form-control-custom" style="padding-top:10px; padding-bottom:10px; padding-left:16px; background-image:none;">
+                            <option value="" th:selected="${param.inadimplente == null || param.inadimplente[0] == ''}">Todos os Clientes</option>
+                            <option value="false" th:selected="${param.inadimplente != null && param.inadimplente[0] == 'false'}">Regular</option>
+                            <option value="true" th:selected="${param.inadimplente != null && param.inadimplente[0] == 'true'}">Inadimplente</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-outline-secondary text-white w-100 py-2 rounded-2 d-flex align-items-center justify-content-center" style="height:46px;">
+                                <i class="bi bi-arrow-clockwise me-2"></i> Atualizar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabela de Clientes -->
+        <div class="glass-card p-4">
+            <div class="table-responsive">
+                <table class="table table-dark-custom table-hover align-middle mb-0 text-start">
+                    <thead>
+                        <tr>
+                            <th>CPF</th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>CNH (Cat.)</th>
+                            <th>Endereço</th>
+                            <th class="text-center">Inadimplente</th>
+                            <th class="text-acoes-col">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="cliente : ${clientes}" class="linha-clicavel" data-detalhes-tipo="cliente" th:data-detalhes-id="${cliente.cpf}">
+                            <td class="font-monospace text-danger fw-bold fs-6" th:text="${cliente.cpf}">111.111.111-11</td>
+                            <td>
+                                <div class="fw-bold text-white fs-6" th:text="${cliente.nome}">Ana Lima</div>
+                                <div class="small text-secondary-custom" th:text="${'Nascimento: ' + (cliente.dataNascimento != null ? #temporals.format(cliente.dataNascimento, 'dd/MM/yyyy') : '-')}">Nascimento: 14/03/1990</div>
+                            </td>
+                            <td th:text="${cliente.email}">ana.lima@email.com</td>
+                            <td>
+                                <span class="font-monospace text-secondary-custom me-2" th:text="${cliente.cnhNumero}">00001111111</span>
+                                <span class="badge badge-cnh font-monospace" th:text="${cliente.cnhCategoria}">B</span>
+                            </td>
+                            <td th:text="${cliente.enderecoCidade + ' - ' + cliente.enderecoEstado}">Recife - PE</td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill px-3 py-2 text-uppercase font-monospace"
+                                      th:style="${!cliente.inadimplente ? 'background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);' : 
+                                                 'background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);'}"
+                                      th:text="${!cliente.inadimplente ? 'Regular' : 'Inadimplente'}">Regular</span>
+                            </td>
+                            <td class="text-acoes-col">
+                                <!-- Botões redondos de ação -->
+                                <button type="button" class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-1" style="width:32px; height:32px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color:#60a5fa;" title="Editar Cliente" data-bs-toggle="modal" th:data-bs-target="${'#modalEditarCliente' + #strings.replace(#strings.replace(cliente.cpf, '.', ''), '-', '')}">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+                                <button sec:authorize="hasRole('GERENTE')" type="button" class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" style="width:32px; height:32px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color:#f87171;" title="Remover Cliente" data-bs-toggle="modal" th:data-bs-target="${'#modalExcluirCliente' + #strings.replace(#strings.replace(cliente.cpf, '.', ''), '-', '')}">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+
+                                <!-- Modal Confirmar Exclusão Cliente -->
+                                <div sec:authorize="hasRole('GERENTE')" class="modal fade" th:id="${'modalExcluirCliente' + #strings.replace(#strings.replace(cliente.cpf, '.', ''), '-', '')}" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header border-bottom-0 pb-0">
+                                                <h5 class="modal-title text-danger d-flex align-items-center fw-bold">
+                                                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirmar Exclusão
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body pt-4 text-start">
+                                                <p class="mb-4">Tem certeza de que deseja excluir o cliente abaixo?</p>
+                                                <div class="p-3 rounded-3 mb-4" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);">
+                                                    <div class="fw-bold fs-6 mb-1">Nome: <span th:text="${cliente.nome}"></span></div>
+                                                    <div class="fw-bold fs-6" style="color: #e11d48;">CPF: <span th:text="${cliente.cpf}"></span></div>
+                                                </div>
+                                                <p class="text-secondary-custom small mb-0">Esta ação removerá permanentemente o registro do sistema e todas as suas locações vinculadas.</p>
+                                            </div>
+                                             <div class="modal-footer border-top-0 pt-0">
+                                                <button type="button" class="btn btn-cancel-custom" data-bs-dismiss="modal">Voltar</button>
+                                                <a th:href="@{/clientes/excluir/{cpf}(cpf=${cliente.cpf})}" class="btn btn-danger px-4 rounded-2">Confirmar Exclusão</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Modal Editar Cliente -->
+                                <div class="modal fade" th:id="${'modalEditarCliente' + #strings.replace(#strings.replace(cliente.cpf, '.', ''), '-', '')}" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+                                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                                        <div class="modal-content wizard-card text-start">
+                                            <form th:action="@{/clientes/salvar}" method="POST">
+                                                <input type="hidden" name="isNovo" value="false">
+                                                <div class="modal-body p-4">
+                                                    <div class="wizard-header">
+                                                        <h5 class="wizard-header-title"><i class="bi bi-pencil-fill me-2" style="color: #60a5fa;"></i>Editar Cliente</h5>
+                                                    </div>
+                                                    <div class="row g-3">
+                                                        
+                                                        <div class="col-12 mt-0">
+                                                            <div class="wizard-step-title" style="margin-bottom: 4px;"><i class="bi bi-person-fill"></i> Dados Pessoais</div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label-custom mb-1">CPF</label>
+                                                            <input type="text" name="cpf" th:value="${cliente.cpf}" class="form-control-custom" style="padding: 10px 16px!important;" readonly>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label-custom mb-1">Nome Completo</label>
+                                                            <input type="text" name="nome" th:value="${cliente.nome}" class="form-control-custom" style="padding: 10px 16px!important;" required>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label-custom mb-1">Data de Nascimento</label>
+                                                            <input type="date" name="dataNascimento" th:value="${cliente.dataNascimento}" class="form-control-custom" style="padding: 10px 16px!important;" required>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label-custom mb-1">E-mail</label>
+                                                            <input type="email" name="email" th:value="${cliente.email}" class="form-control-custom" style="padding: 10px 16px!important;" required>
+                                                        </div>
+                                                        <div class="col-12 mt-3">
+                                                            <div class="form-check p-3 rounded-3" style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2);">
+                                                                <input class="form-check-input ms-1" type="checkbox" name="inadimplente" value="true" th:checked="${cliente.inadimplente}" th:id="${'inadimplenteEdit' + cliente.cpf}">
+                                                                <label class="form-check-label text-danger small ms-2 fw-bold" th:for="${'inadimplenteEdit' + cliente.cpf}">
+                                                                    <i class="bi bi-person-x-fill me-1"></i> Inadimplente (Bloquear Locações)
+                                                                </label>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-12 mt-4">
+                                                            <div class="wizard-step-title" style="margin-bottom: 4px;"><i class="bi bi-card-heading"></i> Habilitação (CNH)</div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label-custom mb-1">Número da CNH</label>
+                                                            <input type="text" name="cnhNumero" th:value="${cliente.cnhNumero}" class="form-control-custom" style="padding: 10px 16px!important;" maxlength="11" oninput="this.value = this.value.replace(/\D/g, '').substring(0, 11)" required>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label-custom mb-1">Categoria</label>
+                                                            <select name="cnhCategoria" class="form-select form-control-custom" style="padding: 10px 16px 10px 16px!important; background-image:none;">
+                                                                <option th:each="cat : ${categoriasCnh}" th:value="${cat}" th:text="${cat}" th:selected="${cat == cliente.cnhCategoria}"></option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label-custom mb-1">Validade</label>
+                                                            <input type="date" name="cnhValidade" th:value="${cliente.cnhValidade}" class="form-control-custom" style="padding: 10px 16px!important;" required>
+                                                        </div>
+
+                                                        <div class="col-12 mt-4">
+                                                            <div class="wizard-step-title" style="margin-bottom: 4px;"><i class="bi bi-geo-alt-fill"></i> Endereço</div>
+                                                        </div>
+                                                         <div class="col-md-3">
+                                                             <label class="form-label-custom mb-1">CEP</label>
+                                                             <input type="text" name="enderecoCep" th:value="${cliente.enderecoCep}" class="form-control-custom" style="padding: 10px 16px!important;" required>
+                                                         </div>
+                                                         <div class="col-md-6">
+                                                             <label class="form-label-custom mb-1">Rua</label>
+                                                             <input type="text" name="enderecoRua" th:value="${cliente.enderecoRua}" class="form-control-custom" style="padding: 10px 16px!important;" required>
+                                                         </div>
+                                                         <div class="col-md-3">
+                                                             <label class="form-label-custom mb-1">Número</label>
+                                                             <input type="text" name="enderecoNumero" th:value="${cliente.enderecoNumero}" class="form-control-custom" style="padding: 10px 16px!important;" required>
+                                                         </div>
+                                                         <div class="col-md-4 mt-3">
+                                                             <label class="form-label-custom mb-1">Bairro</label>
+                                                             <input type="text" name="enderecoBairro" th:value="${cliente.enderecoBairro}" class="form-control-custom" style="padding: 10px 16px!important;" required>
+                                                         </div>
+                                                         <div class="col-md-5 mt-3">
+                                                             <label class="form-label-custom mb-1">Cidade</label>
+                                                             <input type="text" name="enderecoCidade" th:value="${cliente.enderecoCidade}" class="form-control-custom" style="padding: 10px 16px!important;" required>
+                                                         </div>
+                                                         <div class="col-md-3 mt-3">
+                                                             <label class="form-label-custom mb-1">Estado (UF)</label>
+                                                             <input type="text" maxlength="2" name="enderecoEstado" th:value="${cliente.enderecoEstado}" class="form-control-custom" style="padding: 10px 16px!important; text-transform:uppercase;" required>
+                                                         </div>
+                                                    </div>
+                                                    <div class="wizard-footer">
+                                                        <button type="button" class="wizard-btn-cancel" data-bs-dismiss="modal">Cancelar</button>
+                                                        <button type="submit" class="wizard-btn-submit">Salvar Alterações <i class="bi bi-check-lg"></i></button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(clientes)}">
+                            <td colspan="7" class="text-center py-5 text-secondary">
+                                <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                Nenhum cliente encontrado no sistema.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ======================= MODAL: NOVO CLIENTE (WIZARD) ======================= -->
+        <div class="modal fade wizard-modal" id="novoClienteModal" tabindex="-1" aria-labelledby="novoClienteModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content wizard-card text-start">
+                    <form th:action="@{/clientes/salvar}" th:object="${novoCliente}" method="POST">
+                        <input type="hidden" name="isNovo" value="true">
+                        <div class="modal-body p-4">
+                            <!-- Wizard Header -->
+                            <div class="wizard-header">
+                                <h5 class="wizard-header-title">Cadastrar Novo Cliente</h5>
+                                <span class="wizard-step-badge">Passo 1 de 3</span>
+                            </div>
+
+                            <!-- PASSO 1: Dados Pessoais -->
+                            <div class="wizard-step active">
+                                <div class="wizard-step-title">
+                                    <i class="bi bi-person-fill"></i> Passo 1: Dados Pessoais
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom mb-1">Nome Completo</label>
+                                        <input type="text" th:field="*{nome}" class="form-control-custom" style="padding: 10px 16px!important;" placeholder="Digite o nome" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom mb-1">CPF</label>
+                                        <input type="text" id="cpfCad" th:field="*{cpf}" class="form-control-custom" style="padding: 10px 16px!important;" placeholder="000.000.000-00" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom mb-1">Endereço de E-mail</label>
+                                        <input type="email" th:field="*{email}" class="form-control-custom" style="padding: 10px 16px!important;" placeholder="exemplo@email.com" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom mb-1">Data de Nascimento</label>
+                                        <input type="date" th:field="*{dataNascimento}" class="form-control-custom" style="padding: 10px 16px!important;" required>
+                                    </div>
+                                    <div class="col-12 mt-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" th:field="*{inadimplente}" id="inadimplenteCheck">
+                                            <label class="form-check-label text-white small" for="inadimplenteCheck">
+                                                Cliente Inadimplente / Com restrição financeira
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PASSO 2: Habilitação (CNH) -->
+                            <div class="wizard-step">
+                                <div class="wizard-step-title">
+                                    <i class="bi bi-card-heading"></i> Passo 2: Habilitação (CNH)
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label-custom mb-1">Número da CNH</label>
+                                        <input type="text" th:field="*{cnhNumero}" class="form-control-custom" style="padding: 10px 16px!important;" placeholder="Apenas números" maxlength="11" oninput="this.value = this.value.replace(/\D/g, '').substring(0, 11)" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label-custom mb-1">Categoria CNH</label>
+                                        <select th:field="*{cnhCategoria}" class="form-select form-control-custom" style="padding: 10px 16px 10px 16px!important; background-image:none;">
+                                            <option th:each="cat : ${categoriasCnh}" th:value="${cat}" th:text="${cat}">B</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label-custom mb-1">Validade CNH</label>
+                                        <input type="date" th:field="*{cnhValidade}" class="form-control-custom" style="padding: 10px 16px!important;" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PASSO 3: Endereço -->
+                            <div class="wizard-step">
+                                <div class="wizard-step-title">
+                                    <i class="bi bi-geo-alt-fill"></i> Passo 3: Endereço
+                                </div>
+                                <div class="row g-3">
+                                     <div class="col-md-3">
+                                         <label class="form-label-custom mb-1">CEP</label>
+                                         <input type="text" id="cepCad" th:field="*{enderecoCep}" class="form-control-custom" style="padding: 10px 16px!important;" placeholder="00000-000" required>
+                                     </div>
+                                     <div class="col-md-6">
+                                         <label class="form-label-custom mb-1">Rua / Logradouro</label>
+                                         <input type="text" th:field="*{enderecoRua}" class="form-control-custom" style="padding: 10px 16px!important;" placeholder="Rua, Avenida, etc." required>
+                                     </div>
+                                     <div class="col-md-3">
+                                         <label class="form-label-custom mb-1">Número</label>
+                                         <input type="text" th:field="*{enderecoNumero}" class="form-control-custom" style="padding: 10px 16px!important;" placeholder="S/N, 123" required>
+                                     </div>
+                                     <div class="col-md-4">
+                                         <label class="form-label-custom mb-1">Bairro</label>
+                                         <input type="text" th:field="*{enderecoBairro}" class="form-control-custom" style="padding: 10px 16px!important;" placeholder="Bairro" required>
+                                     </div>
+                                     <div class="col-md-5">
+                                         <label class="form-label-custom mb-1">Cidade</label>
+                                         <input type="text" th:field="*{enderecoCidade}" class="form-control-custom" style="padding: 10px 16px!important;" placeholder="Cidade" required>
+                                     </div>
+                                     <div class="col-md-3">
+                                         <label class="form-label-custom mb-1">UF</label>
+                                         <input type="text" maxlength="2" th:field="*{enderecoEstado}" class="form-control-custom" style="padding: 10px 16px!important; text-transform:uppercase;" placeholder="PE" required>
+                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- Wizard Footer -->
+                            <div class="wizard-footer">
+                                <button type="button" class="wizard-btn-back"><i class="bi bi-arrow-left"></i> Voltar</button>
+                                <div class="wizard-footer-right">
+                                    <button type="button" class="wizard-btn-cancel" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="button" class="wizard-btn-next">Avançar <i class="bi bi-arrow-right"></i></button>
+                                    <button type="submit" class="wizard-btn-submit">Cadastrar Cliente <i class="bi bi-person-check"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scripts de Máscaras e Consulta CEP -->
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const cpfCad = document.getElementById('cpfCad');
+                if (cpfCad) {
+                    cpfCad.addEventListener('input', (e) => {
+                        let val = e.target.value.replace(/\D/g, "");
+                        if (val.length > 11) val = val.substring(0, 11);
+                        if (val.length > 9) {
+                            val = val.replace(/^(\d{3})(\d{3})(\d{3})(\d{1,2})$/, "$1.$2.$3-$4");
+                        } else if (val.length > 6) {
+                            val = val.replace(/^(\d{3})(\d{3})(\d{1,3})$/, "$1.$2.$3");
+                        } else if (val.length > 3) {
+                            val = val.replace(/^(\d{3})(\d{1,3})$/, "$1.$2");
+                        }
+                        e.target.value = val;
+                    });
+                }
+
+                const bindCepAutocomplete = (el) => {
+                    el.addEventListener('input', (e) => {
+                        let val = e.target.value.replace(/\D/g, "");
+                        if (val.length > 8) val = val.substring(0, 8);
+                        if (val.length > 5) {
+                            val = val.replace(/^(\d{5})(\d{1,3})$/, "$1-$2");
+                        }
+                        e.target.value = val;
+
+                        const rawCep = val.replace(/\D/g, "");
+                        if (rawCep.length === 8) {
+                            fetch(`https://viacep.com.br/ws/${rawCep}/json/`)
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (!data.erro) {
+                                        const form = e.target.closest('form');
+                                        if (form) {
+                                            const rua = form.querySelector('[name="enderecoRua"]');
+                                            const bairro = form.querySelector('[name="enderecoBairro"]');
+                                            const cidade = form.querySelector('[name="enderecoCidade"]');
+                                            const estado = form.querySelector('[name="enderecoEstado"]');
+
+                                            if (rua) rua.value = data.logradouro || '';
+                                            if (bairro) bairro.value = data.bairro || '';
+                                            if (cidade) cidade.value = data.localidade || '';
+                                            if (estado) estado.value = data.uf || '';
+                                        }
+                                    }
+                                })
+                                .catch(err => console.error("Erro ao buscar CEP:", err));
+                        }
+                    });
+                };
+
+                document.querySelectorAll('input[name="enderecoCep"], #cepCad').forEach(bindCepAutocomplete);
+
+                // Paginação da tabela com 8 itens por página
+                const table = document.querySelector('table');
+                if (table) {
+                    window.paginateTable(table, 8);
+                }
+            });
+        </script>
+
+    </main>
+</body>
+</html>

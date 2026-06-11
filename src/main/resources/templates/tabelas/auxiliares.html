@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title>Tabelas Auxiliares | RentFlow</title>
+</head>
+<body>
+    <main layout:fragment="content">
+        
+        <!-- Header da Página -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="page-header-title mb-1">Tabelas Auxiliares</h1>
+                <p class="page-header-subtitle">Cadastros complementares para o funcionamento do sistema</p>
+            </div>
+        </div>
+
+        <!-- Alertas de Flash Messages -->
+        <div th:if="${successMessage}" class="alert alert-success-custom alert-dismissible fade show mb-4 text-start" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                <span th:text="${successMessage}">Ação realizada com sucesso!</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger-custom alert-dismissible fade show mb-4 text-start" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                <span th:text="${errorMessage}">Erro ao processar.</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Abas (Categorias / Seguros / Funcionários) -->
+        <div class="d-flex gap-2 mb-4">
+            <a th:href="@{/tabelas-auxiliares?tab=categorias}" 
+               class="btn px-4 transition-all" style="border-radius: 14px;"
+               th:classappend="${activeTab == 'categorias' ? 'btn-primary-custom' : 'btn-cancel-custom'}"><i class="bi bi-tag-fill me-2"></i>Categorias</a>
+            <a th:href="@{/tabelas-auxiliares?tab=seguros}" 
+               class="btn px-4 transition-all" style="border-radius: 14px;"
+               th:classappend="${activeTab == 'seguros' ? 'btn-primary-custom' : 'btn-cancel-custom'}"><i class="bi bi-shield-fill-check me-2"></i>Seguros</a>
+            <a th:href="@{/tabelas-auxiliares?tab=funcionarios}" 
+               class="btn px-4 transition-all" style="border-radius: 14px;"
+               th:classappend="${activeTab == 'funcionarios' ? 'btn-primary-custom' : 'btn-cancel-custom'}"><i class="bi bi-people-fill me-2"></i>Funcionários</a>
+        </div>
+
+        <!-- ========================== TAB: CATEGORIAS ========================== -->
+        <div class="row g-4 text-start" th:if="${activeTab == 'categorias'}">
+            <!-- Form de Cadastro -->
+            <div class="col-lg-5">
+                <div class="glass-card wizard-card p-4">
+                    <div class="wizard-header" style="margin-bottom: 16px;">
+                        <h5 class="wizard-header-title"><i class="bi bi-tag-fill me-2" style="color: #a78bfa;"></i>Nova Categoria</h5>
+                    </div>
+                    <form th:action="@{/tabelas-auxiliares/categorias}" th:object="${novaCategoria}" method="POST" class="d-flex flex-column h-100">
+                        <div class="form-fields-container flex-grow-1">
+                            <div class="mb-4">
+                                <label for="nome" class="form-label-custom mb-2">Nome da Categoria</label>
+                                <div class="input-wrapper">
+                                    <i class="bi bi-tag input-icon" style="top:50%; transform:translateY(-50%);"></i>
+                                    <input type="text" id="nome" th:field="*{nome}" class="form-control-custom" placeholder="Ex: SUV, Sedan, Luxo" required>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="valorDiaria" class="form-label-custom mb-2">Valor da Diária (R$)</label>
+                                <div class="input-group input-group-custom number-input-group">
+                                    <button class="btn btn-outline-secondary btn-number" type="button" data-action="minus"><i class="bi bi-dash"></i></button>
+                                    <input type="number" step="10" id="valorDiaria" th:field="*{valorDiaria}" class="form-control-custom text-center" placeholder="0.00" required>
+                                    <button class="btn btn-outline-secondary btn-number" type="button" data-action="plus"><i class="bi bi-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-login-submit w-100">
+                            Criar Categoria
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tabela de Listagem -->
+            <div class="col-lg-7">
+                <div class="glass-card p-4">
+                    <div class="table-responsive">
+                        <table class="table table-dark-custom table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Valor Diária</th>
+                                    <th class="text-acoes-col">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="categoria : ${categorias}">
+                                    <td class="font-monospace text-danger fw-bold fs-6" th:text="${'#' + categoria.idCat}">#1</td>
+                                    <td class="text-white fw-bold fs-6" th:text="${categoria.nome}">Econômico</td>
+                                    <td class="text-white" th:text="${'R$ ' + #numbers.formatDecimal(categoria.valorDiaria != null ? categoria.valorDiaria : 0.0, 1, 'POINT', 2, 'COMMA')}">R$ 80,00</td>
+                                    <td class="text-acoes-col">
+                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-circle d-inline-flex align-items-center justify-content-center" 
+                                                style="width:32px; height:32px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color:#f87171;" 
+                                                title="Remover Categoria" data-bs-toggle="modal" th:data-bs-target="${'#modalExcluirCategoria' + categoria.idCat}">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+
+                                        <!-- Modal Confirmar Exclusão Categoria -->
+                                        <div class="modal fade" th:id="${'modalExcluirCategoria' + categoria.idCat}" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content text-start">
+                                                    <div class="modal-header border-bottom-0 pb-0">
+                                                        <h5 class="modal-title text-danger d-flex align-items-center fw-bold">
+                                                            <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirmar Exclusão
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body pt-4">
+                                                        <p class="mb-4 text-white">Tem certeza de que deseja excluir a categoria abaixo?</p>
+                                                        <div class="p-3 rounded-3 mb-4" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);">
+                                                            <div class="fw-bold fs-6 mb-1">Nome: <span th:text="${categoria.nome}"></span></div>
+                                                            <div class="fw-bold fs-6" style="color: #e11d48;">Valor Diária: <span th:text="${'R$ ' + #numbers.formatDecimal(categoria.valorDiaria != null ? categoria.valorDiaria : 0.0, 1, 'POINT', 2, 'COMMA')}"></span></div>
+                                                        </div>
+                                                        <p class="text-secondary-custom small mb-0">Esta ação removerá permanentemente o registro do sistema.</p>
+                                                    </div>
+                                                    <div class="modal-footer border-top-0 pt-0">
+                                                        <button type="button" class="btn btn-cancel-custom" data-bs-dismiss="modal">Voltar</button>
+                                                        <a th:href="@{/tabelas-auxiliares/categorias/excluir/{id}(id=${categoria.idCat})}" class="btn btn-danger px-4 rounded-2">Confirmar Exclusão</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(categorias)}">
+                                    <td colspan="4" class="text-center py-5 text-secondary">
+                                        <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                        Nenhuma categoria cadastrada.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================== TAB: SEGUROS ========================== -->
+        <div class="row g-4 text-start" th:if="${activeTab == 'seguros'}">
+            <!-- Form de Cadastro -->
+            <div class="col-lg-5">
+                <div class="glass-card wizard-card p-4">
+                    <div class="wizard-header" style="margin-bottom: 16px;">
+                        <h5 class="wizard-header-title"><i class="bi bi-shield-fill me-2" style="color: #a78bfa;"></i>Novo Seguro</h5>
+                    </div>
+                    <form th:action="@{/tabelas-auxiliares/seguros}" th:object="${novoSeguro}" method="POST" class="d-flex flex-column h-100">
+                        <div class="form-fields-container flex-grow-1">
+                            <div class="mb-3">
+                                <label for="nomeSeguro" class="form-label-custom mb-2">Nome do Seguro</label>
+                                <div class="input-wrapper">
+                                    <i class="bi bi-shield-fill input-icon" style="top:50%; transform:translateY(-50%);"></i>
+                                    <input type="text" id="nomeSeguro" th:field="*{nome}" class="form-control-custom" placeholder="Ex: Cobertura Contra Terceiros" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="valorDiarioSeguro" class="form-label-custom mb-2">Valor Diário (R$)</label>
+                                <div class="input-group input-group-custom number-input-group">
+                                    <button class="btn btn-outline-secondary btn-number" type="button" data-action="minus"><i class="bi bi-dash"></i></button>
+                                    <input type="number" step="10" id="valorDiarioSeguro" th:field="*{valorDiario}" class="form-control-custom text-center" placeholder="0.00" required>
+                                    <button class="btn btn-outline-secondary btn-number" type="button" data-action="plus"><i class="bi bi-plus"></i></button>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="descricaoCobertura" class="form-label-custom mb-2">Descrição da Cobertura</label>
+                                <textarea id="descricaoCobertura" th:field="*{descricaoCobertura}" class="form-control-custom" style="padding: 12px 16px!important; height: 100px; resize: none;" placeholder="Descreva os itens cobertos pelo plano de seguro..." required></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-login-submit w-100">
+                            Criar Seguro
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tabela de Listagem -->
+            <div class="col-lg-7">
+                <div class="glass-card p-4">
+                    <div class="table-responsive">
+                        <table class="table table-dark-custom table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome / Cobertura</th>
+                                    <th>Valor Diário</th>
+                                    <th class="text-acoes-col">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="seguro : ${seguros}">
+                                    <td class="font-monospace text-danger fw-bold fs-6" th:text="${'#' + seguro.idSeguro}">#1</td>
+                                    <td>
+                                        <div class="text-white fw-bold fs-6" th:text="${seguro.nome}">Cobertura Básica</div>
+                                        <div class="small text-secondary-custom text-truncate" style="max-width: 280px;" th:text="${seguro.descricaoCobertura}">Roubo e Colisão</div>
+                                    </td>
+                                    <td class="text-white" th:text="${'R$ ' + #numbers.formatDecimal(seguro.valorDiario != null ? seguro.valorDiario : 0.0, 1, 'POINT', 2, 'COMMA')}">R$ 15,00</td>
+                                    <td class="text-acoes-col">
+                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-circle d-inline-flex align-items-center justify-content-center" 
+                                                style="width:32px; height:32px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color:#f87171;" 
+                                                title="Remover Seguro" data-bs-toggle="modal" th:data-bs-target="${'#modalExcluirSeguro' + seguro.idSeguro}">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+
+                                        <!-- Modal Confirmar Exclusão Seguro -->
+                                        <div class="modal fade" th:id="${'modalExcluirSeguro' + seguro.idSeguro}" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content text-start">
+                                                    <div class="modal-header border-bottom-0 pb-0">
+                                                        <h5 class="modal-title text-danger d-flex align-items-center fw-bold">
+                                                            <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirmar Exclusão
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body pt-4">
+                                                        <p class="mb-4 text-white">Tem certeza de que deseja excluir o seguro abaixo?</p>
+                                                        <div class="p-3 rounded-3 mb-4" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);">
+                                                            <div class="fw-bold fs-6 mb-1">Nome: <span th:text="${seguro.nome}"></span></div>
+                                                            <div class="fw-bold fs-6" style="color: #e11d48;">Valor Diário: <span th:text="${'R$ ' + #numbers.formatDecimal(seguro.valorDiario != null ? seguro.valorDiario : 0.0, 1, 'POINT', 2, 'COMMA')}"></span></div>
+                                                        </div>
+                                                        <p class="text-secondary-custom small mb-0">Esta ação removerá permanentemente o registro do sistema.</p>
+                                                    </div>
+                                                    <div class="modal-footer border-top-0 pt-0">
+                                                        <button type="button" class="btn btn-cancel-custom" data-bs-dismiss="modal">Voltar</button>
+                                                        <a th:href="@{/tabelas-auxiliares/seguros/excluir/{id}(id=${seguro.idSeguro})}" class="btn btn-danger px-4 rounded-2">Confirmar Exclusão</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(seguros)}">
+                                    <td colspan="4" class="text-center py-5 text-secondary">
+                                        <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                        Nenhum seguro cadastrado.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================== TAB: FUNCIONÁRIOS ========================== -->
+        <div class="row g-4 text-start" th:if="${activeTab == 'funcionarios'}">
+            <!-- Form de Cadastro -->
+            <div class="col-lg-5">
+                <div class="glass-card wizard-card p-4">
+                    <div class="wizard-header" style="margin-bottom: 16px;">
+                        <h5 class="wizard-header-title"><i class="bi bi-person-badge-fill me-2" style="color: #a78bfa;"></i>Novo Funcionário</h5>
+                    </div>
+                    <form th:action="@{/tabelas-auxiliares/funcionarios}" th:object="${novoFuncionario}" method="POST" class="d-flex flex-column h-100">
+                        <div class="form-fields-container flex-grow-1">
+                            <div class="mb-3">
+                                <label for="nomeFuncionario" class="form-label-custom mb-2">Nome Completo</label>
+                                <div class="input-wrapper">
+                                    <i class="bi bi-person input-icon" style="top:50%; transform:translateY(-50%);"></i>
+                                    <input type="text" id="nomeFuncionario" th:field="*{nome}" class="form-control-custom" placeholder="Digite o nome completo" required>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6 mb-3">
+                                    <label for="cpfInput" class="form-label-custom mb-2">CPF</label>
+                                    <div class="input-wrapper">
+                                        <i class="bi bi-card-text input-icon" style="top:50%; transform:translateY(-50%);"></i>
+                                        <input type="text" id="cpfInput" th:field="*{cpf}" class="form-control-custom" placeholder="000.000.000-00" maxlength="14" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="cargo" class="form-label-custom mb-2">Cargo</label>
+                                    <div class="input-wrapper">
+                                        <i class="bi bi-briefcase input-icon" style="top:50%; transform:translateY(-50%);"></i>
+                                        <select id="cargo" th:field="*{cargo}" class="form-select form-control-custom" style="padding-left: 46px;">
+                                            <option value="ATENDENTE">Atendente</option>
+                                            <option value="GERENTE">Gerente</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label-custom mb-2">Email</label>
+                                    <div class="input-wrapper">
+                                        <i class="bi bi-envelope input-icon" style="top:50%; transform:translateY(-50%);"></i>
+                                        <input type="email" id="email" th:field="*{email}" class="form-control-custom" placeholder="usuario@rentflow.com" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label for="loginFuncionario" class="form-label-custom mb-0">Login</label>
+                                        <a href="javascript:void(0);" class="small text-decoration-none d-flex align-items-center" style="color: var(--accent-color); font-size: 0.77rem; font-weight: 600;" onclick="sugerirLogin()">
+                                            <i class="bi bi-lightbulb-fill text-warning me-1"></i>Sugerir
+                                        </a>
+                                    </div>
+                                    <div class="input-wrapper">
+                                        <i class="bi bi-person-badge input-icon" style="top:50%; transform:translateY(-50%);"></i>
+                                        <input type="text" id="loginFuncionario" th:field="*{login}" class="form-control-custom" placeholder="Ex: joao.silva" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="senha" class="form-label-custom mb-2">Senha</label>
+                                <div class="input-wrapper">
+                                    <i class="bi bi-lock-fill input-icon" style="top:50%; transform:translateY(-50%);"></i>
+                                    <input type="password" id="senha" th:field="*{senha}" class="form-control-custom" placeholder="Senha do funcionário" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-login-submit w-100">
+                            Cadastrar Funcionário
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tabela de Listagem -->
+            <div class="col-lg-7">
+                <div class="glass-card p-4">
+                    <div class="table-responsive">
+                        <table class="table table-dark-custom table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome / CPF / Contato</th>
+                                    <th class="text-center">Cargo</th>
+                                    <th class="text-acoes-col">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="funcionario : ${funcionarios}" class="linha-clicavel" data-detalhes-tipo="funcionario" th:data-detalhes-id="${funcionario.idFunc}">
+                                    <td class="font-monospace text-danger fw-bold fs-6" th:text="${'#' + funcionario.idFunc}">#1</td>
+                                    <td>
+                                        <div class="text-white fw-bold fs-6" th:text="${funcionario.nome}">Marcos Souza</div>
+                                        <div class="small text-secondary-custom font-monospace" th:text="${'CPF: ' + funcionario.cpf}">CPF: 444.444.444-44</div>
+                                        <div class="small text-secondary-custom" th:text="${'Email: ' + funcionario.email + ' | Login: @' + funcionario.login}">Email: marcos.souza@email.com | Login: @marcos.souza</div>
+                                    </td>
+                                    <td class="text-center">
+                                        <!-- Cargo badge pill -->
+                                        <span class="badge rounded-pill px-3 py-2 text-uppercase font-monospace"
+                                              th:classappend="${funcionario.cargo.name() == 'GERENTE' ? 'badge-gerente' : 'badge-atendente'}"
+                                              th:text="${funcionario.cargo}">ATENDENTE</span>
+                                    </td>
+                                    <td class="text-acoes-col">
+                                        <!-- Botão de exclusão seguro -->
+                                        <button th:if="${funcionario.login != 'admin' && (usuarioLogado == null || funcionario.idFunc != usuarioLogado.idFunc)}" 
+                                                type="button"
+                                                class="btn-action-delete" 
+                                                title="Remover Funcionário" data-bs-toggle="modal" th:data-bs-target="${'#modalExcluirFuncionario' + funcionario.idFunc}">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+
+                                        <!-- Modal Confirmar Exclusão Funcionário -->
+                                        <div class="modal fade" th:id="${'modalExcluirFuncionario' + funcionario.idFunc}" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content text-start">
+                                                    <div class="modal-header border-bottom-0 pb-0">
+                                                        <h5 class="modal-title text-danger d-flex align-items-center fw-bold">
+                                                            <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirmar Exclusão
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body pt-4">
+                                                        <p class="mb-4 text-white">Tem certeza de que deseja excluir o funcionário abaixo?</p>
+                                                        <div class="p-3 rounded-3 mb-4" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);">
+                                                            <div class="fw-bold fs-6 mb-1">Nome: <span th:text="${funcionario.nome}"></span></div>
+                                                            <div class="fw-bold fs-6" style="color: #e11d48;">CPF: <span th:text="${funcionario.cpf}"></span></div>
+                                                            <div class="fw-bold fs-6 mt-1 text-secondary-custom">Login: <span th:text="${funcionario.login}"></span></div>
+                                                        </div>
+                                                        <p class="text-secondary-custom small mb-0">Esta ação removerá permanentemente o acesso deste funcionário e seu registro do sistema.</p>
+                                                    </div>
+                                                    <div class="modal-footer border-top-0 pt-0">
+                                                        <button type="button" class="btn btn-cancel-custom" data-bs-dismiss="modal">Voltar</button>
+                                                        <a th:href="@{/tabelas-auxiliares/funcionarios/excluir/{id}(id=${funcionario.idFunc})}" class="btn btn-danger px-4 rounded-2">Confirmar Exclusão</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button th:unless="${funcionario.login != 'admin' && (usuarioLogado == null || funcionario.idFunc != usuarioLogado.idFunc)}" 
+                                                class="btn-action-disabled" 
+                                                disabled 
+                                                title="Não é possível remover o próprio usuário ou o administrador geral">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(funcionarios)}">
+                                    <td colspan="4" class="text-center py-5 text-secondary">
+                                        <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                        Nenhum funcionário cadastrado.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- JavaScript local para interações e máscaras -->
+        <script>
+            // Sugestão de login com base no primeiro e último nome
+            function sugerirLogin() {
+                const nomeInput = document.getElementById('nomeFuncionario');
+                const loginInput = document.getElementById('loginFuncionario');
+                if (!nomeInput || !loginInput) return;
+                
+                let nome = nomeInput.value.trim().toLowerCase();
+                if (!nome) return;
+                
+                // Remove acentuação
+                nome = nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                
+                // Separa os nomes pelas lacunas
+                const partes = nome.split(/\s+/);
+                if (partes.length >= 2) {
+                    loginInput.value = partes[0] + "." + partes[partes.length - 1];
+                } else if (partes.length === 1) {
+                    loginInput.value = partes[0];
+                }
+            }
+
+            document.addEventListener("DOMContentLoaded", () => {
+                // Pagina a tabela ativa com limite de 5 itens por página
+                const table = document.querySelector('table');
+                if (table) {
+                    window.paginateTable(table, 5);
+                }
+
+                // Máscara de CPF para o formulário
+                const cpfInput = document.getElementById('cpfInput');
+                if (cpfInput) {
+                    // Bloqueia letras e caracteres não numéricos no teclado
+                    cpfInput.addEventListener('keypress', (e) => {
+                        // Permite teclas de controle (backspace, tab, etc.)
+                        if (e.ctrlKey || e.metaKey) return;
+                        const char = String.fromCharCode(e.charCode || e.which);
+                        if (!/[0-9]/.test(char)) {
+                            e.preventDefault();
+                        }
+                    });
+
+                    // Autoformata conforme o usuário digita
+                    cpfInput.addEventListener('input', (e) => {
+                        let val = e.target.value.replace(/\D/g, "");
+                        if (val.length > 11) val = val.substring(0, 11);
+                        
+                        if (val.length > 9) {
+                            val = val.replace(/^(\d{3})(\d{3})(\d{3})(\d{1,2})$/, "$1.$2.$3-$4");
+                        } else if (val.length > 6) {
+                            val = val.replace(/^(\d{3})(\d{3})(\d{1,3})$/, "$1.$2.$3");
+                        } else if (val.length > 3) {
+                            val = val.replace(/^(\d{3})(\d{1,3})$/, "$1.$2");
+                        }
+                        e.target.value = val;
+                    });
+
+                    // Sanitiza conteúdo colado (paste)
+                    cpfInput.addEventListener('paste', (e) => {
+                        e.preventDefault();
+                        const pasted = (e.clipboardData || window.clipboardData).getData('text');
+                        let val = pasted.replace(/\D/g, "").substring(0, 11);
+                        if (val.length > 9) {
+                            val = val.replace(/^(\d{3})(\d{3})(\d{3})(\d{1,2})$/, "$1.$2.$3-$4");
+                        } else if (val.length > 6) {
+                            val = val.replace(/^(\d{3})(\d{3})(\d{1,3})$/, "$1.$2.$3");
+                        } else if (val.length > 3) {
+                            val = val.replace(/^(\d{3})(\d{1,3})$/, "$1.$2");
+                        }
+                        cpfInput.value = val;
+                    });
+                }
+            });
+        </script>
+
+    </main>
+</body>
+</html>

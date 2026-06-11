@@ -1,0 +1,64 @@
+<div class="modal-header border-bottom-0 pb-0 d-flex flex-column align-items-start text-start w-100">
+    <div class="d-flex justify-content-between align-items-center w-100">
+        <h4 class="modal-title text-white fw-bold d-flex align-items-center">
+            <i class="bi bi-person-badge-fill text-primary me-2"></i>
+            Detalhes do Funcionário
+        </h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <span class="text-secondary small mt-1" th:text="${'ID: #' + funcionario.idFunc}">ID: #1</span>
+</div>
+
+<div class="modal-body pt-4">
+    <div class="row g-4 text-start">
+        <!-- Coluna Esquerda: Identificação -->
+        <div class="col-lg-6 d-flex flex-column gap-3">
+            <div class="detail-section-card h-100">
+                <h6 class="text-white fw-bold mb-3 d-flex align-items-center">
+                    <i class="bi bi-card-text text-primary me-2"></i> Identificação
+                </h6>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="detail-label">Nome Completo</div>
+                        <div class="detail-value" th:text="${funcionario.nome}">Marcos Souza</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-label">CPF</div>
+                        <div class="detail-value detail-value-monospace" th:text="${funcionario.cpf}">444.444.444-44</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-label">Cargo</div>
+                        <div>
+                            <span class="badge rounded-pill px-3 py-2 text-uppercase font-monospace"
+                                  th:classappend="${funcionario.cargo.name() == 'GERENTE' ? 'badge-gerente' : 'badge-atendente'}"
+                                  th:text="${funcionario.cargo}">ATENDENTE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna Direita: Acesso & Contato -->
+        <div class="col-lg-6 d-flex flex-column gap-3">
+            <div class="detail-section-card h-100">
+                <h6 class="text-white fw-bold mb-3 d-flex align-items-center">
+                    <i class="bi bi-shield-lock-fill text-primary me-2"></i> Acesso &amp; Contato
+                </h6>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="detail-label">E-mail</div>
+                        <div class="detail-value text-break" th:text="${funcionario.email}">marcos.souza@rentflow.com</div>
+                    </div>
+                    <div class="col-12">
+                        <div class="detail-label">Login</div>
+                        <div class="detail-value detail-value-monospace" th:text="${'@' + funcionario.login}">@marcos.souza</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer border-top-0 pt-0">
+    <button type="button" class="btn btn-primary px-4 rounded-2" data-bs-dismiss="modal">Fechar</button>
+</div>

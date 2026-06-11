@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title>Configurações de Perfil | RentFlow</title>
+    <style th:inline="css">
+        /* Custom styles for profile avatar options redesigned */
+        .profile-options-container {
+            background: rgba(15, 23, 42, 0.45) !important; 
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            backdrop-filter: blur(15px);
+            border-radius: 16px;
+        }
+
+        .upload-card-dropzone {
+            background: rgba(255, 255, 255, 0.01) !important;
+            border: 1.5px dashed rgba(255, 255, 255, 0.12) !important;
+            border-radius: 12px;
+            min-height: 160px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .upload-card-dropzone:hover {
+            background: rgba(99, 102, 241, 0.05) !important;
+            border-color: rgba(99, 102, 241, 0.45) !important;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.12), inset 0 2px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .upload-icon-wrapper-new {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: rgba(99, 102, 241, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+        }
+
+        .upload-card-dropzone:hover .upload-icon-wrapper-new {
+            background: rgba(99, 102, 241, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .upload-icon-wrapper-new i {
+            color: #818cf8;
+            font-size: 1.75rem;
+        }
+
+        .avatar-library-card {
+            background: rgba(0, 0, 0, 0.18) !important;
+            border: 1px solid rgba(255, 255, 255, 0.04) !important;
+            border-radius: 12px;
+            min-height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .avatars-grid-layout {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            width: 100%;
+            max-width: 340px;
+            margin: 0 auto;
+        }
+
+        .avatar-option-item {
+            width: 68px !important;
+            height: 68px !important;
+            border: 3px solid transparent !important;
+            border-radius: 50%;
+            cursor: pointer;
+            object-fit: cover;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+        }
+
+        .avatar-option-item:hover {
+            transform: scale(1.15) translateY(-4px) !important;
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.45) !important;
+            border-color: rgba(255, 255, 255, 0.5) !important;
+            z-index: 2;
+        }
+
+        .avatar-option-item.selected {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.45), 0 12px 20px rgba(0, 0, 0, 0.5) !important;
+            transform: scale(1.08) !important;
+        }
+
+        /* Light Theme overrides */
+        body.light-theme .profile-options-container {
+            background: rgba(15, 23, 42, 0.02) !important;
+            border-color: rgba(15, 23, 42, 0.08) !important;
+        }
+
+        body.light-theme .upload-card-dropzone {
+            background: rgba(15, 23, 42, 0.01) !important;
+            border-color: rgba(15, 23, 42, 0.12) !important;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        body.light-theme .upload-card-dropzone:hover {
+            background: rgba(99, 102, 241, 0.04) !important;
+            border-color: rgba(99, 102, 241, 0.35) !important;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.08);
+        }
+
+        body.light-theme .avatar-library-card {
+            background: rgba(15, 23, 42, 0.02) !important;
+            border-color: rgba(15, 23, 42, 0.05) !important;
+        }
+
+        body.light-theme .avatar-option-item {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        body.light-theme .avatar-option-item:hover {
+            border-color: rgba(0, 0, 0, 0.25) !important;
+        }
+    </style>
+</head>
+<body>
+    <main layout:fragment="content">
+        
+        <!-- Header da Página -->
+        <div class="mb-4 text-start">
+            <h1 class="page-header-title mb-1">Configurações de Perfil</h1>
+            <p class="page-header-subtitle">Gerencie suas informações e credenciais de acesso</p>
+        </div>
+
+        <!-- Alertas de Sucesso/Erro -->
+        <div th:if="${successMessage}" class="alert alert-success-custom alert-dismissible fade show mb-4 text-start" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                <span th:text="${successMessage}">Configurações atualizadas com sucesso!</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger-custom alert-dismissible fade show mb-4 text-start" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                <span th:text="${errorMessage}">Erro ao processar alteração.</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="row g-4">
+            <!-- Coluna da Esquerda: Avatar e Opções -->
+            <div class="col-lg-4">
+                <div class="glass-card p-4 text-center d-flex flex-column align-items-center">
+                    <h3 class="fs-5 fw-bold text-primary-custom mb-3 text-start w-100" style="color: #818cf8!important;">
+                        <i class="bi bi-person-bounding-box me-2"></i> Foto de Perfil
+                    </h3>
+                    <div class="position-relative mb-3">
+                        <div style="width: 120px; height: 120px; border-radius: 50%; padding: 3px; background: rgba(255,255,255,0.2); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                            <img id="avatarPreview" th:src="${funcionario.fotoPerfil != null && !#strings.isEmpty(funcionario.fotoPerfil) ? funcionario.fotoPerfil : '/images/avatars/avatar-placeholder.png'}" 
+                                 class="rounded-circle w-100 h-100" style="object-fit: cover; background: #0c0d14;" alt="Avatar do Funcionário">
+                        </div>
+                    </div>
+                    <div class="fw-bold text-white fs-5 mb-1" th:text="${funcionario.nome}">Nome do Funcionário</div>
+                    <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
+                        <span class="badge" style="background: rgba(59, 130, 246, 1); color: #fff; font-size: 0.75rem; letter-spacing: 0.5px;" th:text="${funcionario.cargo}">GERENTE</span>
+                        <span class="text-secondary small font-monospace" th:text="${'@' + funcionario.login}">@usuario</span>
+                    </div>
+                    <div class="d-flex gap-2 mb-2 w-100 justify-content-center">
+                        <button type="button" class="btn btn-sm px-3" style="background: transparent; border: 1px solid rgba(59, 130, 246, 0.5); color: #60a5fa;" data-bs-toggle="modal" data-bs-target="#avatarModal">
+                            <i class="bi bi-pencil-fill me-1"></i> Alterar
+                        </button>
+                        <button type="button" class="btn btn-sm px-3" style="background: transparent; border: 1px solid rgba(239, 68, 68, 0.5); color: #f87171;" onclick="removeProfilePhoto()">
+                            <i class="bi bi-trash-fill me-1"></i> Remover
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Card de Permissões / Nível de Acesso -->
+                <div class="glass-card p-4 mt-4 text-start">
+                    <h3 class="fs-5 fw-bold text-primary-custom mb-3" style="color: #818cf8!important;">
+                        <i class="bi bi-shield-lock-fill me-2"></i> Nível de Acesso
+                    </h3>
+                    
+                    <!-- Cargo Gerente -->
+                    <div th:if="${funcionario.cargo.name() == 'GERENTE'}">
+                        <div class="d-flex align-items-center mb-3 p-2 rounded-3" style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.25);">
+                            <i class="bi bi-key-fill text-purple fs-4 me-2" style="color: #c084fc;"></i>
+                            <div>
+                                <span class="fw-bold text-white d-block small">Acesso de Administrador</span>
+                                <span class="text-secondary small" style="font-size: 0.75rem;">Permissões totais habilitadas</span>
+                            </div>
+                        </div>
+                        <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small">
+                            <li class="d-flex align-items-start text-secondary-custom">
+                                <i class="bi bi-check-circle-fill text-success me-2 mt-0.5"></i>
+                                <span>Gerenciar frotas, locações e clientes</span>
+                            </li>
+                            <li class="d-flex align-items-start text-secondary-custom">
+                                <i class="bi bi-check-circle-fill text-success me-2 mt-0.5"></i>
+                                <span>Acesso e edição de Tabelas Auxiliares</span>
+                            </li>
+                            <li class="d-flex align-items-start text-secondary-custom">
+                                <i class="bi bi-check-circle-fill text-success me-2 mt-0.5"></i>
+                                <span>Exclusão permanente de registros</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Cargo Atendente -->
+                    <div th:unless="${funcionario.cargo.name() == 'GERENTE'}">
+                        <div class="d-flex align-items-center mb-3 p-2 rounded-3" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.25);">
+                            <i class="bi bi-person-fill-check fs-4 me-2" style="color: #60a5fa;"></i>
+                            <div>
+                                <span class="fw-bold text-white d-block small">Acesso Operacional</span>
+                                <span class="text-secondary small" style="font-size: 0.75rem;">Operações diárias da locadora</span>
+                            </div>
+                        </div>
+                        <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small">
+                            <li class="d-flex align-items-start text-secondary-custom">
+                                <i class="bi bi-check-circle-fill text-success me-2 mt-0.5"></i>
+                                <span>Registrar locações e manutenções</span>
+                            </li>
+                            <li class="d-flex align-items-start text-secondary-custom">
+                                <i class="bi bi-check-circle-fill text-success me-2 mt-0.5"></i>
+                                <span>Cadastrar clientes e veículos</span>
+                            </li>
+                            <li class="d-flex align-items-start text-secondary-custom">
+                                <i class="bi bi-x-circle-fill text-danger me-2 mt-0.5"></i>
+                                <span>Sem permissão para exclusões</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <hr style="border-color: rgba(255,255,255,0.08); margin: 12px 0;">
+                    
+                    <div class="d-flex justify-content-between align-items-center text-secondary small" style="font-size: 0.8rem;">
+                        <span>Matrícula: <strong class="text-white" th:text="${'#' + funcionario.idFunc}">#12</strong></span>
+                        <span>Status: <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1" style="font-size:0.65rem;">ATIVO</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coluna da Direita: Formulários -->
+            <div class="col-lg-8">
+                <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+                    <form th:action="@{/configuracoes/salvar}" method="POST" id="profileForm">
+                        <input type="hidden" name="fotoPerfil" id="fotoPerfilHidden" th:value="${funcionario.fotoPerfil}">
+
+                        <!-- Informações Pessoais -->
+                        <div class="mb-4">
+                            <h3 class="fs-5 fw-bold text-primary-custom mb-3 d-flex align-items-center" style="color: #818cf8!important;">
+                                <i class="bi bi-person-vcard me-2 fs-4"></i> Informações Pessoais
+                            </h3>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label-custom fw-bold">Nome Completo</label>
+                                    <input type="text" name="nome" class="form-control-custom text-white" th:value="${funcionario.nome}" style="background: rgba(255,255,255,0.02); padding: 10px 14px;" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-custom fw-bold text-white">CPF (Não Editável)</label>
+                                    <div class="input-wrapper">
+                                        <i class="bi bi-lock-fill input-icon text-secondary" style="top:50%; transform:translateY(-50%);"></i>
+                                        <input type="text" name="cpf" id="cpfInput" class="form-control-custom text-secondary" style="background: rgba(0,0,0,0.2)!important; border-color: rgba(255,255,255,0.05)!important; padding: 10px 14px 10px 40px;" th:value="${funcionario.cpf}" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-custom fw-bold">E-mail</label>
+                                    <input type="email" name="email" class="form-control-custom text-white" th:value="${funcionario.email}" style="background: rgba(255,255,255,0.02); padding: 10px 14px;" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-custom fw-bold text-white">Login (Não Editável)</label>
+                                    <div class="input-wrapper">
+                                        <i class="bi bi-lock-fill input-icon text-secondary" style="top:50%; transform:translateY(-50%);"></i>
+                                        <input type="text" class="form-control-custom text-secondary" style="background: rgba(0,0,0,0.2)!important; border-color: rgba(255,255,255,0.05)!important; padding: 10px 14px 10px 40px;" th:value="${funcionario.login}" readonly disabled>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr style="border-color: rgba(255,255,255,0.08); margin: 1.5rem 0;">
+
+                        <!-- Segurança e Senha -->
+                        <div class="mb-2">
+                            <h3 class="fs-5 fw-bold text-primary-custom mb-1 d-flex align-items-center" style="color: #818cf8!important;">
+                                <i class="bi bi-shield-lock me-2 fs-4"></i> Segurança e Senha
+                            </h3>
+                            <p class="text-secondary small mb-3">Informe a senha atual para autorizar alterações de credenciais.</p>
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label class="form-label-custom fw-bold">Senha Antiga</label>
+                                    <div class="input-wrapper">
+                                        <input type="password" id="senhaAntiga" name="senhaAntiga" class="form-control-custom" style="background: rgba(255,255,255,0.02); padding: 10px 14px;" placeholder="Informe sua senha atual">
+                                        <button type="button" class="btn-toggle-password" style="right: 12px;" onclick="togglePassword('senhaAntiga', this)">
+                                            <i class="bi bi-eye text-secondary"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-custom fw-bold">Nova Senha</label>
+                                    <div class="input-wrapper">
+                                        <input type="password" id="novaSenha" name="novaSenha" class="form-control-custom" style="background: rgba(255,255,255,0.02); padding: 10px 14px;" placeholder="Nova senha">
+                                        <button type="button" class="btn-toggle-password" style="right: 12px;" onclick="togglePassword('novaSenha', this)">
+                                            <i class="bi bi-eye text-secondary"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-custom fw-bold">Confirmar Nova Senha</label>
+                                    <div class="input-wrapper">
+                                        <input type="password" id="confirmacaoSenha" name="confirmacaoSenha" class="form-control-custom" style="background: rgba(255,255,255,0.02); padding: 10px 14px;" placeholder="Confirme nova senha">
+                                        <button type="button" class="btn-toggle-password" style="right: 12px;" onclick="togglePassword('confirmacaoSenha', this)">
+                                            <i class="bi bi-eye text-secondary"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Botão Salvar -->
+                    <div class="mt-4 pt-3 border-top text-end" style="border-color: rgba(255,255,255,0.08)!important;">
+                        <button type="button" class="btn btn-primary-custom px-4 py-2 d-inline-flex align-items-center rounded-3" style="background: linear-gradient(135deg, #8b5cf6, #ec4899); border: none;" onclick="submitForms()">
+                            <i class="bi bi-download me-2"></i> Salvar Alterações
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function submitForms() {
+                document.getElementById('profileForm').submit();
+            }
+
+            function togglePassword(inputId, button) {
+                const input = document.getElementById(inputId);
+                const icon = button.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('bi-eye');
+                    icon.classList.add('bi-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('bi-eye-slash');
+                    icon.classList.add('bi-eye');
+                }
+            }
+
+            function selectAvatar(url) {
+                if (!url) return;
+                
+                // Get relative path for avatars to avoid domain issues
+                let relativePath = url;
+                if (url.includes('/images/avatars/')) {
+                    relativePath = '/images/avatars/' + url.split('/images/avatars/')[1];
+                }
+                
+                document.getElementById('avatarPreview').src = relativePath;
+                document.getElementById('fotoPerfilHidden').value = relativePath;
+                
+                const options = document.querySelectorAll('.avatar-option-item');
+                options.forEach(opt => {
+                    let optRelative = opt.getAttribute('src');
+                    if (optRelative && optRelative.includes('/images/avatars/')) {
+                        optRelative = '/images/avatars/' + optRelative.split('/images/avatars/')[1];
+                    }
+                    if (optRelative === relativePath) {
+                        opt.classList.add('selected');
+                    } else {
+                        opt.classList.remove('selected');
+                    }
+                });
+            }
+
+            function handleFileUpload(input) {
+                if (input.files && input.files[0]) {
+                    const file = input.files[0];
+                    document.getElementById('fileNameLabel').textContent = file.name;
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = new Image();
+                        img.onload = function() {
+                            // Create canvas to resize to 150x150
+                            const canvas = document.createElement('canvas');
+                            canvas.width = 150;
+                            canvas.height = 150;
+                            const ctx = canvas.getContext('2d');
+                            
+                            // Draw resized image on canvas
+                            ctx.drawImage(img, 0, 0, 150, 150);
+                            
+                            // Export as compressed data URL
+                            const dataUrl = canvas.toDataURL('image/jpeg', 0.85); // 85% quality Jpeg is very small!
+                            
+                            // Set preview and hidden value
+                            document.getElementById('avatarPreview').src = dataUrl;
+                            document.getElementById('fotoPerfilHidden').value = dataUrl;
+                            
+                            // Deselect other predefined avatars
+                            const options = document.querySelectorAll('.avatar-option-item');
+                            options.forEach(opt => {
+                                opt.classList.remove('selected');
+                            });
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            function removeProfilePhoto() {
+                const placeholderUrl = '/images/avatars/avatar-placeholder.png';
+                document.getElementById('avatarPreview').src = placeholderUrl;
+                document.getElementById('fotoPerfilHidden').value = '';
+                document.getElementById('fileNameLabel').textContent = 'Nenhum arquivo selecionado';
+                document.getElementById('fileUploadInput').value = '';
+                const options = document.querySelectorAll('.avatar-option-item');
+                options.forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+            }
+
+            document.addEventListener("DOMContentLoaded", () => {
+                const currentAvatar = document.getElementById('fotoPerfilHidden').value;
+                if (currentAvatar && currentAvatar.trim() !== '') {
+                    selectAvatar(currentAvatar);
+                } else {
+                    document.getElementById('avatarPreview').src = '/images/avatars/avatar-placeholder.png';
+                }
+                
+                const cpfInput = document.getElementById('cpfInput');
+                if (cpfInput) {
+                    cpfInput.addEventListener('input', (e) => {
+                        let val = e.target.value.replace(/\D/g, "");
+                        if (val.length > 11) val = val.substring(0, 11);
+                        if (val.length > 9) {
+                            val = val.replace(/^(\d{3})(\d{3})(\d{3})(\d{1,2})$/, "$1.$2.$3-$4");
+                        } else if (val.length > 6) {
+                            val = val.replace(/^(\d{3})(\d{3})(\d{1,3})$/, "$1.$2.$3");
+                        } else if (val.length > 3) {
+                            val = val.replace(/^(\d{3})(\d{1,3})$/, "$1.$2");
+                        }
+                        e.target.value = val;
+                    });
+                }
+            });
+        </script>
+
+        <!-- Modal para Alterar Foto de Perfil -->
+        <div class="modal fade" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true" style="z-index: 1080;">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div class="modal-header border-bottom-0 pb-0">
+                        <h5 class="modal-title text-white fw-bold" id="avatarModalLabel">
+                            <i class="bi bi-person-bounding-box me-2" style="color: #818cf8;"></i>Escolher Foto de Perfil
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4 text-start">
+                        <!-- Predefined avatars -->
+                        <div class="mb-4">
+                            <label class="form-label-custom small mb-2 d-block fw-bold text-secondary-custom">Biblioteca RentFlow</label>
+                            <div class="avatar-library-card py-2" style="min-height: auto;">
+                                <div class="avatars-grid-layout" style="grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                                    <img class="avatar-option-item cursor-pointer" style="width: 44px; height: 44px;" th:src="@{/images/avatars/avatar1.png}" onclick="selectAvatar(this.src)" alt="Avatar 1">
+                                    <img class="avatar-option-item cursor-pointer" style="width: 44px; height: 44px;" th:src="@{/images/avatars/avatar2.png}" onclick="selectAvatar(this.src)" alt="Avatar 2">
+                                    <img class="avatar-option-item cursor-pointer" style="width: 44px; height: 44px;" th:src="@{/images/avatars/avatar3.png}" onclick="selectAvatar(this.src)" alt="Avatar 3">
+                                    <img class="avatar-option-item cursor-pointer" style="width: 44px; height: 44px;" th:src="@{/images/avatars/avatar4.png}" onclick="selectAvatar(this.src)" alt="Avatar 4">
+                                    <img class="avatar-option-item cursor-pointer" style="width: 44px; height: 44px;" th:src="@{/images/avatars/avatar5.png}" onclick="selectAvatar(this.src)" alt="Avatar 5">
+                                    <img class="avatar-option-item cursor-pointer" style="width: 44px; height: 44px;" th:src="@{/images/avatars/avatar6.png}" onclick="selectAvatar(this.src)" alt="Avatar 6">
+                                    <img class="avatar-option-item cursor-pointer" style="width: 44px; height: 44px;" th:src="@{/images/avatars/avatar7.png}" onclick="selectAvatar(this.src)" alt="Avatar 7">
+                                    <img class="avatar-option-item cursor-pointer" style="width: 44px; height: 44px;" th:src="@{/images/avatars/avatar8.png}" onclick="selectAvatar(this.src)" alt="Avatar 8">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- File Upload Dropzone -->
+                        <div>
+                            <label class="form-label-custom small mb-2 d-block fw-bold text-secondary-custom">Upload de Imagem</label>
+                            <div class="upload-card-dropzone p-3" style="min-height: 100px;" onclick="document.getElementById('fileUploadInput').click()">
+                                <i class="bi bi-cloud-arrow-up-fill fs-4 text-primary"></i>
+                                <span class="small text-white fw-bold d-block mt-1">Selecione imagem</span>
+                                <span id="fileNameLabel" class="text-secondary-custom small text-truncate d-block mt-1 w-100 text-center" style="max-width:180px; margin: 0 auto;">Nenhum arquivo</span>
+                            </div>
+                            <input type="file" id="fileUploadInput" accept="image/*" class="d-none" onchange="handleFileUpload(this)">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top-0 pt-0">
+                        <button type="button" class="btn btn-primary-custom px-4 py-2 w-100 rounded-3" style="background: linear-gradient(135deg, #8b5cf6, #ec4899); border: none;" data-bs-dismiss="modal">
+                            <i class="bi bi-check2-circle me-1"></i> Confirmar Seleção
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</body>
+</html>

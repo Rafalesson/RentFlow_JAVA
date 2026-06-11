@@ -1,0 +1,103 @@
+<div class="modal-header border-bottom-0 pb-0 d-flex flex-column align-items-start text-start w-100">
+    <div class="d-flex justify-content-between align-items-center w-100">
+        <h4 class="modal-title text-white fw-bold d-flex align-items-center">
+            <i class="bi bi-person-badge text-primary me-2"></i>
+            Detalhes do Cliente
+        </h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <span class="text-secondary small mt-1" th:text="${'CPF: ' + cliente.cpf}">CPF: 112.345.678-76</span>
+</div>
+
+<div class="modal-body pt-4">
+    <div class="row g-4 text-start">
+        <!-- Coluna Esquerda: Identificação e Contato -->
+        <div class="col-lg-6 d-flex flex-column gap-3">
+            <div class="detail-section-card h-100">
+                <h6 class="text-white fw-bold mb-3 d-flex align-items-center">
+                    <i class="bi bi-card-text text-primary me-2"></i> Identificação &amp; Contato
+                </h6>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="detail-label">Nome Completo</div>
+                        <div class="detail-value" th:text="${cliente.nome}">ALINE DANIELE DA CUNHA</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-label">CPF</div>
+                        <div class="detail-value detail-value-monospace" th:text="${cliente.cpf}">112.345.678-76</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-label">Nascimento</div>
+                        <div class="detail-value" th:text="${cliente.dataNascimento != null ? #temporals.format(cliente.dataNascimento, 'dd/MM/yyyy') : '-'}">08/05/2000</div>
+                    </div>
+                    <div class="col-12">
+                        <div class="detail-label">E-mail</div>
+                        <div class="detail-value text-break" th:text="${cliente.email}">aline.cunha@rentflow.com</div>
+                    </div>
+                    <div class="col-12 mt-2">
+                        <div class="detail-label">Status Financeiro</div>
+                        <span class="badge rounded-pill px-3 py-2 text-uppercase font-monospace"
+                              th:style="${!cliente.inadimplente ? 'background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);' : 
+                                         'background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);'}"
+                              th:text="${!cliente.inadimplente ? 'Regular' : 'Inadimplente'}">Regular</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna Direita: CNH e Endereço -->
+        <div class="col-lg-6 d-flex flex-column gap-3">
+            <!-- Habilitação (CNH) -->
+            <div class="detail-section-card">
+                <h6 class="text-white fw-bold mb-3 d-flex align-items-center">
+                    <i class="bi bi-card-heading text-primary me-2"></i> Habilitação (CNH)
+                </h6>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="detail-label">Número do Documento</div>
+                        <div class="detail-value font-monospace" th:text="${cliente.cnhNumero}">09876543421</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-label">Categoria</div>
+                        <div>
+                            <span class="badge font-monospace px-2 py-1 rounded-2" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);" th:text="${cliente.cnhCategoria}">A</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-label">Validade</div>
+                        <div class="detail-value" th:text="${cliente.cnhValidade != null ? #temporals.format(cliente.cnhValidade, 'dd/MM/yyyy') : '-'}">12/06/2028</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Endereço -->
+            <div class="detail-section-card">
+                <h6 class="text-white fw-bold mb-3 d-flex align-items-center">
+                    <i class="bi bi-geo-alt-fill text-primary me-2"></i> Endereço
+                </h6>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="detail-label">Logradouro</div>
+                        <div class="detail-value" th:text="${cliente.enderecoRua + ', N° ' + cliente.enderecoNumero}">Praça da República, N° 555</div>
+                    </div>
+                    <div class="col-12">
+                        <div class="detail-label">Bairro</div>
+                        <div class="detail-value" th:text="${cliente.enderecoBairro}">Centro</div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="detail-label">Cidade / UF</div>
+                        <div class="detail-value" th:text="${cliente.enderecoCidade + ' - ' + cliente.enderecoEstado}">Rio de Janeiro - RJ</div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="detail-label">CEP</div>
+                        <div class="detail-value font-monospace" th:text="${cliente.enderecoCep}">20211-350</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer border-top-0 pt-0">
+    <button type="button" class="btn btn-primary px-4 rounded-2" data-bs-dismiss="modal">Fechar</button>
+</div>

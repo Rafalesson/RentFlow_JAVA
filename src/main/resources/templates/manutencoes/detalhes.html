@@ -1,0 +1,99 @@
+<div class="modal-header border-bottom-0 pb-0 d-flex flex-column align-items-start text-start w-100">
+    <div class="d-flex justify-content-between align-items-center w-100">
+        <h4 class="modal-title text-white fw-bold d-flex align-items-center">
+            <i class="bi bi-wrench-adjustable text-primary me-2"></i>
+            Detalhes da Manutenção
+        </h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <span class="text-secondary small mt-1" th:text="${'Código: #' + manutencao.idManut}">Código: #3</span>
+</div>
+
+<div class="modal-body pt-4">
+    <div class="row g-4 text-start">
+        <!-- Coluna Esquerda: Identificação e Veículo -->
+        <div class="col-lg-6 d-flex flex-column gap-3">
+            <div class="detail-section-card h-100">
+                <h6 class="text-white fw-bold mb-3 d-flex align-items-center">
+                    <i class="bi bi-info-circle-fill text-primary me-2"></i> Identificação &amp; Veículo
+                </h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="detail-label">Cód. Manutenção</div>
+                        <div class="detail-value fw-bold" th:text="${'#' + manutencao.idManut}">#3</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-label">Tipo</div>
+                        <div class="mt-1">
+                            <span class="badge rounded-pill px-3 py-2 text-uppercase font-monospace"
+                                  th:style="${manutencao.tipo.name() == 'CORRETIVA' ? 'background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);' : 
+                                             'background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3);'}"
+                                  th:text="${manutencao.tipo.label}">CORRETIVA</span>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="detail-label">Veículo</div>
+                        <div class="detail-value" th:text="${manutencao.veiculo?.marca + ' ' + manutencao.veiculo?.modelo}">BMW 320i</div>
+                    </div>
+                    <div class="col-12">
+                        <div class="detail-label">Placa</div>
+                        <div class="detail-value detail-value-monospace text-uppercase" th:text="${manutencao.veiculo?.placa}">GHI3F45</div>
+                    </div>
+                    <div class="col-12 mt-2">
+                        <div class="detail-label">Operador Responsável</div>
+                        <div class="d-flex align-items-center gap-2 mt-1">
+                            <div class="profile-avatar-container d-flex align-items-center justify-content-center rounded-circle" style="width: 28px; height: 28px; background: rgba(99, 102, 241, 0.15); border: 1.2px solid rgba(99, 102, 241, 0.3);">
+                                <i class="bi bi-person-fill text-primary" style="font-size:0.85rem;"></i>
+                            </div>
+                            <span class="detail-value text-white small" th:text="${manutencao.funcionario?.nome}">Administrador RentFlow Teste</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna Direita: Fluxo e Faturamento -->
+        <div class="col-lg-6 d-flex flex-column gap-3">
+            <div class="detail-section-card h-100">
+                <h6 class="text-white fw-bold mb-3 d-flex align-items-center">
+                    <i class="bi bi-currency-dollar text-primary me-2"></i> Fluxo &amp; Faturamento
+                </h6>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="detail-label">Motivo</div>
+                        <div class="detail-value fw-bold" th:text="${manutencao.motivo}">Trocar o óleo</div>
+                    </div>
+                    <div class="col-12">
+                        <div class="detail-label">Descrição Detalhada</div>
+                        <div class="detail-value text-secondary-custom small" style="line-height: 1.4;" th:text="${manutencao.descricao}">Óleo vazando</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-label">Entrada</div>
+                        <div class="detail-value" th:text="${manutencao.dataEntrada != null ? #temporals.format(manutencao.dataEntrada, 'dd/MM/yyyy') : '-'}">10/06/2026</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-label">Prev. Saída</div>
+                        <div class="detail-value" th:text="${manutencao.previsaoSaida != null ? #temporals.format(manutencao.previsaoSaida, 'dd/MM/yyyy') : '-'}">11/06/2026</div>
+                    </div>
+                    <div class="col-md-6 mt-3">
+                        <div class="detail-label">Data de Conclusão</div>
+                        <div class="detail-value text-success" th:if="${manutencao.dataSaidaReal != null}">
+                            <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${#temporals.format(manutencao.dataSaidaReal, 'dd/MM/yyyy')}">10/06/2026</span>
+                        </div>
+                        <div class="detail-value text-warning" th:if="${manutencao.dataSaidaReal == null}">
+                            <i class="bi bi-clock-history me-1"></i> Em Andamento
+                        </div>
+                    </div>
+                    <div class="col-md-6 mt-3">
+                        <div class="detail-label">Custo Total</div>
+                        <div class="detail-value fs-5 fw-bold font-monospace" th:classappend="${manutencao.dataSaidaReal != null ? 'text-success' : 'text-secondary-custom'}" th:text="${manutencao.custo != null ? 'R$ ' + #numbers.formatDecimal(manutencao.custo, 1, 'POINT', 2, 'COMMA') : '-'}">R$ 100,00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer border-top-0 pt-0">
+    <button type="button" class="btn btn-primary px-4 rounded-2" data-bs-dismiss="modal">Fechar</button>
+</div>

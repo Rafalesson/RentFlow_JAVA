@@ -1,0 +1,98 @@
+<div class="modal-header border-bottom-0 pb-0 d-flex flex-column align-items-start text-start w-100">
+    <div class="d-flex justify-content-between align-items-center w-100">
+        <h4 class="modal-title text-white fw-bold d-flex align-items-center">
+            <i class="bi bi-car-front-fill text-primary me-2"></i>
+            Detalhes do Veículo
+        </h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <span class="text-secondary small mt-1" th:text="${'Placa: ' + veiculo.placa}">Placa: ABC1D23</span>
+</div>
+
+<div class="modal-body pt-4">
+    <div class="row g-4 text-start">
+        <!-- Coluna Esquerda: Informações do Veículo -->
+        <div class="col-lg-6 d-flex flex-column gap-3">
+            <div class="detail-section-card h-100">
+                <h6 class="text-white fw-bold mb-3 d-flex align-items-center">
+                    <i class="bi bi-info-circle-fill text-primary me-2"></i> Informações do Veículo
+                </h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="detail-label">Marca</div>
+                        <div class="detail-value" th:text="${veiculo.marca}">Volkswagen</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-label">Modelo</div>
+                        <div class="detail-value" th:text="${veiculo.modelo}">Gol</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-label">Placa</div>
+                        <div class="detail-value detail-value-monospace text-uppercase" th:text="${veiculo.placa}">ABC1D23</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-label">Renavam</div>
+                        <div class="detail-value font-monospace" th:text="${veiculo.renavam}">00000000001</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-label">Cor</div>
+                        <div class="detail-value" th:text="${veiculo.cor}">Prata</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-label">Ano Fab.</div>
+                        <div class="detail-value" th:text="${veiculo.anoFabricacao}">2021</div>
+                    </div>
+                    <div class="col-12 mt-2">
+                        <div class="detail-label">Categoria e Diária</div>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <span class="fs-6 fw-bold text-white" th:text="${veiculo.categoria?.nome}">Econômico</span>
+                            <span class="badge detail-badge-indigo font-monospace px-3 py-2 rounded-2" th:text="${'R$ ' + #numbers.formatDecimal(veiculo.categoria?.valorDiaria != null ? veiculo.categoria.valorDiaria : 0.0, 1, 'POINT', 2, 'COMMA') + ' / dia'}">R$ 80.00 / dia</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+ 
+        <!-- Coluna Direita: Métricas e Estado -->
+        <div class="col-lg-6 d-flex flex-column gap-3">
+            <div class="detail-section-card h-100">
+                <h6 class="text-white fw-bold mb-3 d-flex align-items-center">
+                    <i class="bi bi-speedometer2 text-primary me-2"></i> Métricas &amp; Estado
+                </h6>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="detail-label">Combustível</div>
+                        <span class="badge detail-badge-outline font-monospace px-2 py-1 text-uppercase text-secondary" th:text="${veiculo.tipoCombustivel?.label ?: veiculo.tipoCombustivel}">GASOLINA</span>
+                    </div>
+                    <div class="col-12">
+                        <div class="detail-label">Quilometragem Atual</div>
+                        <div class="detail-value fs-4 fw-bold font-monospace text-white" th:text="${#numbers.formatInteger(veiculo.kmAtual, 1, 'POINT') + ' KM'}">45.400 KM</div>
+                    </div>
+                    <div class="col-12">
+                        <div class="detail-label" th:text="${'Nível de Combustível (' + veiculo.nivelCombustivel + '%)'}">Nível de Combustível (45%)</div>
+                        <div class="d-flex align-items-center gap-2 mt-1">
+                            <div class="progress-fuel flex-grow-1" style="height:10px;">
+                                <div class="progress-fuel-bar" 
+                                     th:style="${'width: ' + veiculo.nivelCombustivel + '%;' + (veiculo.nivelCombustivel < 20 ? 'background-color: #ef4444;' : (veiculo.nivelCombustivel < 50 ? 'background-color: #f59e0b;' : 'background-color: #10b981;'))}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 mt-3">
+                        <div class="detail-label">Status do Veículo</div>
+                        <div class="mt-1">
+                            <span class="badge rounded-pill px-3 py-2 text-uppercase font-monospace"
+                                  th:style="${veiculo.status.name() == 'DISPONIVEL' ? 'background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);' : 
+                                             (veiculo.status.name() == 'LOCADO' ? 'background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);' : 
+                                             'background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);')}"
+                                  th:text="${veiculo.status.label}">DISPONÍVEL</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer border-top-0 pt-0">
+    <button type="button" class="btn btn-primary px-4 rounded-2" data-bs-dismiss="modal">Fechar</button>
+</div>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title>Veículos | RentFlow</title>
+</head>
+<body>
+    <main layout:fragment="content">
+        
+        <!-- Header da Página -->
+        <div class="d-flex justify-content-between align-items-center mb-4 text-start">
+            <div>
+                <h1 class="page-header-title mb-1">Veículos</h1>
+                <p class="page-header-subtitle">Gerencie a frota de automóveis da locadora</p>
+            </div>
+            <!-- Novo Veículo Triggers Modal -->
+            <button type="button" class="btn btn-primary-custom d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#novoVeiculoModal">
+                <i class="bi bi-car-front-fill me-2"></i> Novo Veículo
+            </button>
+        </div>
+
+        <!-- Alertas de Flash Messages -->
+        <div th:if="${successMessage}" class="alert alert-success-custom alert-dismissible fade show mb-4 text-start" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                <span th:text="${successMessage}">Operação concluída com sucesso!</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger-custom alert-dismissible fade show mb-4 text-start" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                <span th:text="${errorMessage}">Erro ao processar veículo.</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Painel de Filtros Integrado -->
+        <div class="glass-card p-3 mb-4">
+            <form method="GET" th:action="@{/veiculos}" id="filtroVeiculosForm">
+                <div class="row g-3 align-items-end text-start">
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary small fw-bold mb-2">Pesquisar</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-search input-icon" style="top:50%; transform:translateY(-50%); left:16px;"></i>
+                            <input type="text" id="buscaInput" name="busca" th:value="${param.busca != null ? param.busca[0] : ''}" class="form-control-custom auto-submit" style="padding-top:10px; padding-bottom:10px;" placeholder="Buscar por placa, marca ou modelo...">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary small fw-bold mb-2">Filtrar por Status</label>
+                        <select name="status" onchange="this.form.submit()" class="form-select form-control-custom" style="padding-top:10px; padding-bottom:10px; padding-left:16px; background-image:none;">
+                            <option value="" th:selected="${param.status == null || param.status[0] == ''}">Todos os Status</option>
+                            <option value="DISPONIVEL" th:selected="${param.status != null && param.status[0] == 'DISPONIVEL'}">Disponível</option>
+                            <option value="LOCADO" th:selected="${param.status != null && param.status[0] == 'LOCADO'}">Locado</option>
+                            <option value="EM_MANUTENCAO" th:selected="${param.status != null && param.status[0] == 'EM_MANUTENCAO'}">Em Manutenção</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-outline-secondary text-white w-100 py-2 rounded-2 d-flex align-items-center justify-content-center" style="height:46px;">
+                                <i class="bi bi-arrow-clockwise me-2"></i> Atualizar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabela da Frota -->
+        <div class="glass-card p-4">
+            <div class="table-responsive">
+                <table class="table table-dark-custom table-hover align-middle mb-0 text-start">
+                    <thead>
+                        <tr>
+                            <th>Placa</th>
+                            <th>Veículo</th>
+                            <th class="text-center">Categoria</th>
+                            <th class="text-center">Combustível</th>
+                            <th>KM / Comb.</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-acoes-col">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="veiculo : ${veiculos}" class="linha-clicavel" data-detalhes-tipo="veiculo" th:data-detalhes-id="${veiculo.placa}">
+                            <td class="font-monospace text-danger text-uppercase fw-bold fs-6" th:text="${veiculo.placa}">ABC1D23</td>
+                            <td>
+                                <div class="fw-bold text-white fs-6" th:text="${veiculo.marca + ' ' + veiculo.modelo}">Volkswagen Gol</div>
+                                <div class="small text-secondary-custom" th:text="${'Cor: ' + veiculo.cor + ' | Ano: ' + veiculo.anoFabricacao}">Cor: Prata | Ano: 2021</div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-category font-monospace" th:text="${veiculo.categoria?.nome ?: 'Sem categoria'}">Econômico</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-fuel font-monospace text-uppercase" th:text="${veiculo.tipoCombustivel}">FLEX</span>
+                            </td>
+                            <td>
+                                <div class="mb-1 text-white fw-bold small" th:text="${#numbers.formatInteger(veiculo.kmAtual, 1, 'POINT') + ' KM'}">45.400 KM</div>
+                                <div class="d-flex align-items-center gap-2" style="max-width: 140px;">
+                                    <div class="progress-fuel flex-grow-1">
+                                        <div class="progress-fuel-bar" 
+                                             th:style="${'width: ' + veiculo.nivelCombustivel + '%;' + (veiculo.nivelCombustivel < 20 ? 'background-color: #ef4444;' : (veiculo.nivelCombustivel < 50 ? 'background-color: #f59e0b;' : 'background-color: #10b981;'))}"></div>
+                                    </div>
+                                    <span class="small text-secondary" style="font-size:0.75rem; white-space: nowrap;" th:text="${veiculo.nivelCombustivel + '% Comb.'}">45% Comb.</span>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill px-3 py-2 text-uppercase font-monospace"
+                                      th:style="${veiculo.status.name() == 'DISPONIVEL' ? 'background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);' : 
+                                                 (veiculo.status.name() == 'LOCADO' ? 'background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);' : 
+                                                 'background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);')}"
+                                      th:text="${veiculo.status.label}">DISPONÍVEL</span>
+                            </td>
+                            <td class="text-acoes-col">
+                                <button type="button" class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-1" style="width:32px; height:32px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color:#60a5fa;" title="Editar Veículo" data-bs-toggle="modal" th:data-bs-target="${'#modalEditarVeiculo' + #strings.replace(veiculo.placa, '-', '')}">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+
+                                <button sec:authorize="hasRole('GERENTE')" type="button" class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" style="width:32px; height:32px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color:#f87171;" title="Remover Veículo" data-bs-toggle="modal" th:data-bs-target="${'#modalExcluirVeiculo' + #strings.replace(veiculo.placa, '-', '')}">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+
+                                <!-- Modal Confirmar Exclusão Veículo -->
+                                <div sec:authorize="hasRole('GERENTE')" class="modal fade" th:id="${'modalExcluirVeiculo' + #strings.replace(veiculo.placa, '-', '')}" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header border-bottom-0 pb-0">
+                                                <h5 class="modal-title text-danger d-flex align-items-center fw-bold">
+                                                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirmar Exclusão
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body pt-4 text-start">
+                                                <p class="mb-4">Tem certeza de que deseja excluir o veículo abaixo?</p>
+                                                <div class="p-3 rounded-3 mb-4" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);">
+                                                    <div class="fw-bold fs-6 mb-1">Modelo: <span th:text="${veiculo.modelo + ' (' + veiculo.marca + ')'}"></span></div>
+                                                    <div class="fw-bold fs-6" style="color: #e11d48;">Placa: <span th:text="${veiculo.placa}"></span></div>
+                                                </div>
+                                                <p class="text-secondary-custom small mb-0">Esta ação removerá permanentemente o registro do sistema e todos os históricos vinculados.</p>
+                                            </div>
+                                             <div class="modal-footer border-top-0 pt-0">
+                                                <button type="button" class="btn btn-cancel-custom" data-bs-dismiss="modal">Voltar</button>
+                                                <a th:href="@{/veiculos/excluir/{placa}(placa=${veiculo.placa})}" class="btn btn-danger px-4 rounded-2">Confirmar Exclusão</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal Editar Veículo -->
+                                <div class="modal fade" th:id="${'modalEditarVeiculo' + #strings.replace(veiculo.placa, '-', '')}" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+                                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                                        <div class="modal-content wizard-card text-start">
+                                            <form th:action="@{/veiculos/salvar}" method="POST">
+                                                <input type="hidden" name="isNovo" value="false">
+                                                <div class="modal-body p-4">
+                                                    <div class="wizard-header">
+                                                        <h5 class="wizard-header-title"><i class="bi bi-pencil-fill me-2" style="color: #60a5fa;"></i>Editar Veículo</h5>
+                                                    </div>
+                                                    <div class="row g-3">
+                                                        <div class="col-md-4">
+                                                            <label class="form-label-custom mb-1">Placa</label>
+                                                            <input type="text" name="placa" th:value="${veiculo.placa}" maxlength="8" class="form-control-custom text-uppercase" style="padding: 10px 16px!important;" readonly>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label-custom mb-1">Categoria</label>
+                                                            <select name="categoria.idCat" class="form-select form-control-custom" style="padding: 10px 16px 10px 16px!important; background-image:none;" required>
+                                                                <option th:each="cat : ${categorias}" th:value="${cat.idCat}" th:text="${cat.nome + ' (Diária: R$ ' + cat.valorDiaria + ')'}" th:selected="${cat.idCat == veiculo.categoria?.idCat}"></option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label-custom mb-1">Renavam</label>
+                                                            <input type="text" name="renavam" th:value="${veiculo.renavam}" maxlength="11" class="form-control-custom" style="padding: 10px 16px!important;" required>
+                                                        </div>
+                                                        <div class="col-md-4 mt-4">
+                                                            <label class="form-label-custom mb-1">Marca</label>
+                                                            <input type="text" name="marca" th:value="${veiculo.marca}" class="form-control-custom" style="padding: 10px 16px!important;" required>
+                                                        </div>
+                                                        <div class="col-md-4 mt-4">
+                                                            <label class="form-label-custom mb-1">Modelo</label>
+                                                            <input type="text" name="modelo" th:value="${veiculo.modelo}" class="form-control-custom" style="padding: 10px 16px!important;" required>
+                                                        </div>
+                                                        <div class="col-md-4 mt-4">
+                                                            <label class="form-label-custom mb-1">Cor</label>
+                                                            <input type="text" name="cor" th:value="${veiculo.cor}" class="form-control-custom" style="padding: 10px 16px!important;" required>
+                                                        </div>
+                                                        <div class="col-md-4 mt-4">
+                                                            <label class="form-label-custom mb-1">Ano de Fabricação</label>
+                                                            <div class="input-group input-group-custom number-input-group">
+                                                                <button class="btn btn-outline-secondary btn-number" type="button" data-action="minus"><i class="bi bi-dash"></i></button>
+                                                                <input type="number" name="anoFabricacao" th:value="${veiculo.anoFabricacao}" step="1" class="form-control-custom text-center" required>
+                                                                <button class="btn btn-outline-secondary btn-number" type="button" data-action="plus"><i class="bi bi-plus"></i></button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4 mt-4">
+                                                            <label class="form-label-custom mb-1">Combustível</label>
+                                                            <select name="tipoCombustivel" class="form-select form-control-custom" style="padding: 10px 16px 10px 16px!important; background-image:none;" required>
+                                                                <option th:each="comb : ${combustiveis}" th:value="${comb.name()}" th:text="${comb.label}" th:selected="${comb == veiculo.tipoCombustivel}"></option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4 mt-4">
+                                                            <label class="form-label-custom mb-1">Status do Veículo</label>
+                                                            <select name="status" class="form-select form-control-custom" style="padding: 10px 16px 10px 16px!important; background-image:none;" required>
+                                                                <option th:each="st : ${statusList}" th:value="${st.name()}" th:text="${st.label}" th:selected="${st == veiculo.status}"></option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-6 mt-4">
+                                                            <label class="form-label-custom mb-1">KM Atual</label>
+                                                            <div class="input-group input-group-custom number-input-group">
+                                                                <button class="btn btn-outline-secondary btn-number" type="button" data-action="minus" style="padding: 0 20px;"><i class="bi bi-dash"></i></button>
+                                                                <input type="number" name="kmAtual" th:value="${veiculo.kmAtual}" step="10" min="0" class="form-control-custom text-center" required>
+                                                                <button class="btn btn-outline-secondary btn-number" type="button" data-action="plus" style="padding: 0 20px;"><i class="bi bi-plus"></i></button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6 mt-4">
+                                                            <label class="form-label-custom mb-1">Nível de Combustível (%)</label>
+                                                            <div class="input-group input-group-custom number-input-group">
+                                                                <button class="btn btn-outline-secondary btn-number" type="button" data-action="minus" style="padding: 0 20px;"><i class="bi bi-dash"></i></button>
+                                                                <input type="number" name="nivelCombustivel" th:value="${veiculo.nivelCombustivel}" min="0" max="100" step="1" class="form-control-custom text-center" required>
+                                                                <button class="btn btn-outline-secondary btn-number" type="button" data-action="plus" style="padding: 0 20px;"><i class="bi bi-plus"></i></button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="wizard-footer">
+                                                        <button type="button" class="wizard-btn-cancel" data-bs-dismiss="modal">Cancelar</button>
+                                                        <button type="submit" class="wizard-btn-submit">Salvar Alterações <i class="bi bi-check-lg"></i></button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(veiculos)}">
+                            <td colspan="7" class="text-center py-5 text-secondary">
+                                <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                Nenhum veículo encontrado no sistema.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ======================= MODAL: NOVO VEÍCULO (WIZARD) ======================= -->
+        <div class="modal fade wizard-modal" id="novoVeiculoModal" tabindex="-1" aria-labelledby="novoVeiculoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content wizard-card text-start">
+                    <form th:action="@{/veiculos/salvar}" th:object="${novoVeiculo}" method="POST">
+                        <input type="hidden" name="isNovo" value="true">
+                        <div class="modal-body p-4">
+                            <!-- Wizard Header -->
+                            <div class="wizard-header">
+                                <h5 class="wizard-header-title">Cadastrar Novo Veículo</h5>
+                                <span class="wizard-step-badge">Passo 1 de 3</span>
+                            </div>
+
+                            <!-- PASSO 1: Identificação -->
+                            <div class="wizard-step active">
+                                <div class="wizard-step-title">
+                                    <i class="bi bi-upc-scan"></i> Passo 1: Identificação
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label-custom mb-1">Placa</label>
+                                        <input type="text" th:field="*{placa}" maxlength="8" class="form-control-custom text-uppercase" style="padding: 10px 16px!important;" placeholder="AAA-0000" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label-custom mb-1">Renavam</label>
+                                        <input type="text" th:field="*{renavam}" maxlength="11" class="form-control-custom" style="padding: 10px 16px!important;" placeholder="Apenas números" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label-custom mb-1">Categoria</label>
+                                        <select th:field="*{categoria.idCat}" class="form-select form-control-custom" style="padding: 10px 16px 10px 16px!important; background-image:none;" required>
+                                            <option th:each="cat : ${categorias}" th:value="${cat.idCat}" th:text="${cat.nome}">Econômico</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PASSO 2: Detalhes do Veículo -->
+                            <div class="wizard-step">
+                                <div class="wizard-step-title">
+                                    <i class="bi bi-car-front-fill"></i> Passo 2: Detalhes do Veículo
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label-custom mb-1">Marca</label>
+                                        <input type="text" th:field="*{marca}" class="form-control-custom" style="padding: 10px 16px!important;" placeholder="Ex: Chevrolet, Fiat" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label-custom mb-1">Modelo</label>
+                                        <input type="text" th:field="*{modelo}" class="form-control-custom" style="padding: 10px 16px!important;" placeholder="Ex: Onix, Uno" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label-custom mb-1">Cor</label>
+                                        <input type="text" th:field="*{cor}" class="form-control-custom" style="padding: 10px 16px!important;" placeholder="Ex: Prata, Preto" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label-custom mb-1">Ano Fabricação</label>
+                                        <div class="input-group input-group-custom number-input-group">
+                                            <button class="btn btn-outline-secondary btn-number" type="button" data-action="minus"><i class="bi bi-dash"></i></button>
+                                            <input type="number" th:field="*{anoFabricacao}" step="1" class="form-control-custom text-center" required>
+                                            <button class="btn btn-outline-secondary btn-number" type="button" data-action="plus"><i class="bi bi-plus"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label-custom mb-1">Tipo de Combustível</label>
+                                        <select th:field="*{tipoCombustivel}" class="form-select form-control-custom" style="padding: 10px 16px 10px 16px!important; background-image:none;" required>
+                                            <option th:each="comb : ${combustiveis}" th:value="${comb.name()}" th:text="${comb.label}">Flex</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label-custom mb-1">Status Atual</label>
+                                        <select th:field="*{status}" class="form-select form-control-custom" style="padding: 10px 16px 10px 16px!important; background-image:none;" required>
+                                            <option th:each="st : ${statusList}" th:value="${st.name()}" th:text="${st.label}">Disponível</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PASSO 3: Condição Atual -->
+                            <div class="wizard-step">
+                                <div class="wizard-step-title">
+                                    <i class="bi bi-speedometer2"></i> Passo 3: Condição Atual
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom mb-1">Quilometragem (KM) Atual</label>
+                                        <div class="input-group input-group-custom number-input-group">
+                                            <button class="btn btn-outline-secondary btn-number" type="button" data-action="minus" style="padding: 0 20px;"><i class="bi bi-dash"></i></button>
+                                            <input type="number" th:field="*{kmAtual}" step="10" min="0" class="form-control-custom text-center" required>
+                                            <button class="btn btn-outline-secondary btn-number" type="button" data-action="plus" style="padding: 0 20px;"><i class="bi bi-plus"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom mb-1">Nível de Combustível (%)</label>
+                                        <div class="input-group input-group-custom number-input-group">
+                                            <button class="btn btn-outline-secondary btn-number" type="button" data-action="minus" style="padding: 0 20px;"><i class="bi bi-dash"></i></button>
+                                            <input type="number" min="0" max="100" th:field="*{nivelCombustivel}" step="1" class="form-control-custom text-center" required>
+                                            <button class="btn btn-outline-secondary btn-number" type="button" data-action="plus" style="padding: 0 20px;"><i class="bi bi-plus"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Wizard Footer -->
+                            <div class="wizard-footer">
+                                <button type="button" class="wizard-btn-back"><i class="bi bi-arrow-left"></i> Voltar</button>
+                                <div class="wizard-footer-right">
+                                    <button type="button" class="wizard-btn-cancel" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="button" class="wizard-btn-next">Avançar <i class="bi bi-arrow-right"></i></button>
+                                    <button type="submit" class="wizard-btn-submit">Cadastrar Veículo <i class="bi bi-car-front-fill"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Script local para paginação dos veículos -->
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const table = document.querySelector('table');
+                if (table) {
+                    window.paginateTable(table, 8);
+                }
+            });
+        </script>
+    </main>
+</body>
+</html>
