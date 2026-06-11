@@ -31,15 +31,15 @@
         </div>
 
         <!-- Abas (Categorias / Seguros / Funcionários) -->
-        <div class="d-flex gap-2 mb-4">
+        <div class="d-flex flex-wrap flex-md-nowrap gap-2 mb-4 w-100">
             <a th:href="@{/tabelas-auxiliares?tab=categorias}" 
-               class="btn px-4 transition-all" style="border-radius: 14px;"
+               class="btn px-2 px-md-4 py-2 transition-all d-flex align-items-center justify-content-center flex-grow-1 flex-md-grow-0" style="border-radius: 14px; font-size: 0.9rem;"
                th:classappend="${activeTab == 'categorias' ? 'btn-primary-custom' : 'btn-cancel-custom'}"><i class="bi bi-tag-fill me-2"></i>Categorias</a>
             <a th:href="@{/tabelas-auxiliares?tab=seguros}" 
-               class="btn px-4 transition-all" style="border-radius: 14px;"
+               class="btn px-2 px-md-4 py-2 transition-all d-flex align-items-center justify-content-center flex-grow-1 flex-md-grow-0" style="border-radius: 14px; font-size: 0.9rem;"
                th:classappend="${activeTab == 'seguros' ? 'btn-primary-custom' : 'btn-cancel-custom'}"><i class="bi bi-shield-fill-check me-2"></i>Seguros</a>
             <a th:href="@{/tabelas-auxiliares?tab=funcionarios}" 
-               class="btn px-4 transition-all" style="border-radius: 14px;"
+               class="btn px-2 px-md-4 py-2 transition-all d-flex align-items-center justify-content-center flex-grow-1 flex-md-grow-0" style="border-radius: 14px; font-size: 0.9rem;"
                th:classappend="${activeTab == 'funcionarios' ? 'btn-primary-custom' : 'btn-cancel-custom'}"><i class="bi bi-people-fill me-2"></i>Funcionários</a>
         </div>
 
