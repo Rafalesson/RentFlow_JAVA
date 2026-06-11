@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 @Controller
 public class HomeController {
-
     private final VeiculoService veiculoService;
     private final ClienteService clienteService;
     private final LocacaoService locacaoService;
@@ -25,6 +24,7 @@ public class HomeController {
         this.clienteService = clienteService;
         this.locacaoService = locacaoService;
     }
+
 
     @GetMapping("/")
     public String index(Model model) {
