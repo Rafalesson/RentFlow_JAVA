@@ -1651,8 +1651,8 @@ body.light-theme .glass-card .table-responsive::-webkit-scrollbar-thumb:hover {
 
 body.light-theme .glass-card .table-responsive thead th {
     background: #ffffff !important;
-}/* Layout constraints for full viewport pages (fit to screen height) */
-@media (min-height: 650px) {
+}/* Layout constraints for full viewport pages (fit to screen height) on desktop only */
+@media (min-width: 992px) and (min-height: 650px) {
     .main-content-wrapper {
         height: 100vh;
         max-height: 100vh;
@@ -1964,4 +1964,112 @@ body.light-theme .pagination-btn:hover:not(:disabled) {
     padding-left: 20px !important;
     padding-right: 36px !important;
 }
+
+/* =====================================================
+   RESPONSIVENESS AND MOBILE ADAPTATION
+   ===================================================== */
+
+/* Mobile Header (Top bar) style */
+.mobile-header {
+    height: 60px;
+    background: rgba(9, 9, 15, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1010;
+}
+
+body.light-theme .mobile-header {
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.btn-toggle-sidebar {
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-toggle-sidebar:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+body.light-theme .btn-toggle-sidebar:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* Sidebar Backdrop */
+.sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Media Queries for screen widths < 992px (Mobile & Tablet) */
+@media (max-width: 991.98px) {
+    .sidebar-wrapper {
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1005;
+        box-shadow: 15px 0 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .sidebar-wrapper.active {
+        transform: translateX(0);
+    }
+
+    .main-content-wrapper {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding-top: 80px !important; /* Spacing for the fixed mobile header */
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+    
+    /* Make tables responsive to allow horizontal scrolling on tiny screens */
+    .table-responsive {
+        width: 100% !important;
+        overflow-x: auto !important;
+    }
+
+    /* Adjust page headers for smaller viewports */
+    .page-header-title {
+        font-size: 1.5rem !important;
+    }
+    
+    .page-header-subtitle {
+        font-size: 0.85rem !important;
+    }
+    
+    /* Adjust modal margins for small viewports */
+    .modal-dialog {
+        margin: 0.75rem !important;
+    }
+}
+
 

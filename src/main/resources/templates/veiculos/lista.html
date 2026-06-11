@@ -13,8 +13,8 @@
                 <p class="page-header-subtitle">Gerencie a frota de automóveis da locadora</p>
             </div>
             <!-- Novo Veículo Triggers Modal -->
-            <button type="button" class="btn btn-primary-custom d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#novoVeiculoModal">
-                <i class="bi bi-car-front-fill me-2"></i> Novo Veículo
+            <button type="button" class="btn btn-primary-custom d-flex align-items-center justify-content-center px-3 px-md-4" data-bs-toggle="modal" data-bs-target="#novoVeiculoModal">
+                <i class="bi bi-car-front-fill me-md-2"></i> <span class="d-none d-md-inline">Novo Veículo</span>
             </button>
         </div>
 
@@ -38,11 +38,14 @@
         <div class="glass-card p-3 mb-4">
             <form method="GET" th:action="@{/veiculos}" id="filtroVeiculosForm">
                 <div class="row g-3 align-items-end text-start">
-                    <div class="col-md-6">
+                    <div class="col-md-8">
                         <label class="form-label text-secondary small fw-bold mb-2">Pesquisar</label>
-                        <div class="input-wrapper">
+                        <div class="input-wrapper gap-2">
                             <i class="bi bi-search input-icon" style="top:50%; transform:translateY(-50%); left:16px;"></i>
                             <input type="text" id="buscaInput" name="busca" th:value="${param.busca != null ? param.busca[0] : ''}" class="form-control-custom auto-submit" style="padding-top:10px; padding-bottom:10px;" placeholder="Buscar por placa, marca ou modelo...">
+                            <button type="submit" class="btn btn-outline-secondary text-white py-2 px-3 rounded-2 d-flex align-items-center justify-content-center" style="height:46px; min-width: 46px;">
+                                <i class="bi bi-arrow-clockwise me-md-2"></i> <span class="d-none d-md-inline">Atualizar</span>
+                            </button>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -53,13 +56,6 @@
                             <option value="LOCADO" th:selected="${param.status != null && param.status[0] == 'LOCADO'}">Locado</option>
                             <option value="EM_MANUTENCAO" th:selected="${param.status != null && param.status[0] == 'EM_MANUTENCAO'}">Em Manutenção</option>
                         </select>
-                    </div>
-                    <div class="col-md-2">
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-outline-secondary text-white w-100 py-2 rounded-2 d-flex align-items-center justify-content-center" style="height:46px;">
-                                <i class="bi bi-arrow-clockwise me-2"></i> Atualizar
-                            </button>
-                        </div>
                     </div>
                 </div>
             </form>

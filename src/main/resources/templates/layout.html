@@ -25,6 +25,37 @@
     </script>
 
     <div class="app-wrapper">
+        <!-- Header Mobile -->
+        <div class="mobile-header d-lg-none d-flex align-items-center justify-content-between">
+            <button type="button" class="btn-toggle-sidebar" id="mobileSidebarToggleBtn">
+                <i class="bi bi-list fs-3"></i>
+            </button>
+            <div class="d-flex align-items-center">
+                <div class="logo-box-mini me-2 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 7C7 7 8 4 12 4C16 4 17 7 20 7" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M4 12C7 12 8 9 12 9C16 9 17 12 20 12" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M4 17C7 17 8 14 12 14C16 14 17 17 20 17" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h1 class="brand-title fs-5 mb-0" style="color: var(--text-color);">RentFlow</h1>
+            </div>
+            <!-- Profile Link Mobile -->
+            <a th:href="@{/configuracoes}" style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; display: block;">
+                <img th:if="${usuarioLogado != null && usuarioLogado.fotoPerfil != null && !#strings.isEmpty(usuarioLogado.fotoPerfil)}" 
+                     th:src="${usuarioLogado.fotoPerfil}" 
+                     alt="Avatar" 
+                     style="width: 32px; height: 32px; object-fit: cover; border: 1.5px solid rgba(255,255,255,0.25);">
+                <img th:unless="${usuarioLogado != null && usuarioLogado.fotoPerfil != null && !#strings.isEmpty(usuarioLogado.fotoPerfil)}" 
+                     th:src="@{/images/avatars/avatar-placeholder.png}" 
+                     alt="Avatar" 
+                     style="width: 32px; height: 32px; object-fit: cover; border: 1.5px solid rgba(255,255,255,0.25);">
+            </a>
+        </div>
+
+        <!-- Backdrop para Sidebar Mobile -->
+        <div class="sidebar-backdrop d-lg-none" id="sidebarBackdrop"></div>
+
         <!-- Sidebar Esquerda -->
         <aside class="sidebar-wrapper">
             <!-- Brand Logo -->
@@ -595,7 +626,32 @@
                     window.abrirModalDetalhes(tipo, id);
                 }
             });
+
+            // Mobile Sidebar Toggle logic
+            const toggleBtn = document.getElementById('mobileSidebarToggleBtn');
+            const sidebar = document.querySelector('.sidebar-wrapper');
+            const backdrop = document.getElementById('sidebarBackdrop');
+
+            if (toggleBtn && sidebar && backdrop) {
+                function toggleSidebar() {
+                    sidebar.classList.toggle('active');
+                    backdrop.classList.toggle('active');
+                }
+
+                toggleBtn.addEventListener('click', toggleSidebar);
+                backdrop.addEventListener('click', toggleSidebar);
+
+                // Close sidebar when a link is clicked
+                const sidebarLinks = sidebar.querySelectorAll('.nav-item-custom');
+                sidebarLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        sidebar.classList.remove('active');
+                        backdrop.classList.remove('active');
+                    });
+                });
+            }
         });
     </script>
 </body>
 </html>
+
