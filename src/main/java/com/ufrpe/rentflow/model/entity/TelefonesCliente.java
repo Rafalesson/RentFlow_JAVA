@@ -19,7 +19,7 @@ public class TelefonesCliente {
     @Column(nullable = false, length = 20)
     private String tipo;
 
-    // Getters and Setters
+    // Getters e Setters
 
     public Cliente getCliente() { return cliente; }
     public void setCliente(Cliente cliente) { this.cliente = cliente; }

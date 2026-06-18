@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -59,7 +58,7 @@ public class SecurityConfig {
         return username -> {
             Funcionario func = funcionarioRepository.findByLogin(username)
                 .orElseGet(() -> {
-                    // Auto-provision default users if they don't exist yet in the database
+                    // Auto-provisiona usuários padrão se eles ainda não existirem no banco de dados
                     Funcionario novo = new Funcionario();
                     novo.setLogin(username);
                     if ("admin".equals(username)) {
@@ -79,11 +78,11 @@ public class SecurityConfig {
                     }
                     return funcionarioRepository.save(novo);
                 });
-
+ 
             return User.builder()
                 .username(func.getLogin())
                 .password(func.getSenha())
-                .roles(func.getCargo().name()) // GERENTE or ATENDENTE
+                .roles(func.getCargo().name()) // GERENTE ou ATENDENTE
                 .build();
         };
     }

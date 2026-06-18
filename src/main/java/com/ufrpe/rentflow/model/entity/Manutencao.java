@@ -45,7 +45,7 @@ public class Manutencao {
     @Column(precision = 10, scale = 2)
     private BigDecimal custo;
 
-    // Getters and Setters
+    // Getters e Setters
 
     public Integer getIdManut() { return idManut; }
     public void setIdManut(Integer idManut) { this.idManut = idManut; }

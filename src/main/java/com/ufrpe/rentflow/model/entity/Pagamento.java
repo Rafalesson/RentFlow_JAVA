@@ -29,7 +29,7 @@ public class Pagamento {
     @Column(nullable = false, updatable = false)
     private OffsetDateTime data = OffsetDateTime.now();
 
-    // Getters and Setters
+    // Getters e Setters
 
     public Integer getIdPagamento() { return idPagamento; }
     public void setIdPagamento(Integer idPagamento) { this.idPagamento = idPagamento; }

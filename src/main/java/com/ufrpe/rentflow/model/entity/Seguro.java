@@ -22,7 +22,7 @@ public class Seguro {
     @Column(name = "valor_diario", nullable = false, precision = 10, scale = 2)
     private BigDecimal valorDiario;
 
-    // Getters and Setters
+    // Getters e Setters
 
     public Integer getIdSeguro() { return idSeguro; }
     public void setIdSeguro(Integer idSeguro) { this.idSeguro = idSeguro; }

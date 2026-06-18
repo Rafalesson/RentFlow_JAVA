@@ -56,7 +56,7 @@ public class Cliente {
     @Column(name = "endereco_cep", nullable = false, length = 9)
     private String enderecoCep;
 
-    // Getters and Setters
+    // Getters e Setters
 
     public String getCpf() { return cpf; }
     public void setCpf(String cpf) { this.cpf = cpf; }

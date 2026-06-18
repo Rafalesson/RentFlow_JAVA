@@ -5,7 +5,7 @@ import java.util.Objects;
 
 public class TelefonesClienteId implements Serializable {
 
-    private String cliente; // Matches the property name in TelefonesCliente
+    private String cliente; // Corresponde ao nome da propriedade em TelefonesCliente
     private String numero;
 
     public TelefonesClienteId() {}
@@ -15,7 +15,7 @@ public class TelefonesClienteId implements Serializable {
         this.numero = numero;
     }
 
-    // Getters, Setters, hashCode, equals
+    // Getters, Setters, hashCode e equals
 
     public String getCliente() { return cliente; }
     public void setCliente(String cliente) { this.cliente = cliente; }

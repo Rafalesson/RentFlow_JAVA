@@ -34,7 +34,7 @@ public class Funcionario {
     @Column(name = "foto_perfil", columnDefinition = "TEXT")
     private String fotoPerfil;
 
-    // Getters and Setters
+    // Getters e Setters
 
     public Integer getIdFunc() {
         return idFunc;

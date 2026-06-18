@@ -32,7 +32,7 @@ public class CobrancaExtra {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal valor;
 
-    // Getters and Setters
+    // Getters e Setters
 
     public Integer getIdCobranca() { return idCobranca; }
     public void setIdCobranca(Integer idCobranca) { this.idCobranca = idCobranca; }

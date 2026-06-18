@@ -19,7 +19,7 @@ public class Categoria {
     @Column(name = "valor_diaria", nullable = false, precision = 10, scale = 2)
     private BigDecimal valorDiaria;
 
-    // Getters and Setters
+    // Getters e Setters
     public Integer getIdCat() {
         return idCat;
     }

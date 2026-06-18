@@ -38,7 +38,7 @@ public class Vistoria {
     @Column(columnDefinition = "TEXT")
     private String observacoes;
 
-    // Getters and Setters
+    // Getters e Setters
 
     public Integer getIdVistoria() { return idVistoria; }
     public void setIdVistoria(Integer idVistoria) { this.idVistoria = idVistoria; }

@@ -44,7 +44,7 @@ public class Veiculo {
     @Column(nullable = false)
     private StatusVeiculo status = StatusVeiculo.DISPONIVEL;
 
-    // Getters and Setters
+    // Getters e Setters
 
     public String getPlaca() { return placa; }
     public void setPlaca(String placa) { this.placa = placa; }

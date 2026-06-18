@@ -58,7 +58,7 @@ public class Locacao {
     @Column(name = "valor_total", precision = 10, scale = 2)
     private BigDecimal valorTotal;
 
-    // Getters and Setters
+    // Getters e Setters
 
     public Integer getIdLoc() { return idLoc; }
     public void setIdLoc(Integer idLoc) { this.idLoc = idLoc; }
