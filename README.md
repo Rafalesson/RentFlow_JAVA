@@ -6,7 +6,7 @@ A aplicação foi projetada para otimizar os fluxos de trabalho de locadoras de 
 
 ---
 
-## 🌐 Demonstração Online
+## Demonstração Online
 
 A aplicação está hospedada e disponível para testes no Render:
 
@@ -91,7 +91,7 @@ Você pode executar o projeto localmente de duas formas: usando o Maven ou atrav
 ### Opção 1: Executando Localmente (Maven)
 
 1.  **Configurar o Banco de Dados:**
-    Por padrão, o projeto busca o banco de dados em `localhost:5432/rentflow`. Caso precise alterar ou queira rodar conectado ao seu banco, crie um arquivo chamado `application-local.properties` em `src/main/resources/` (este arquivo já está configurado no `.gitignore` para sua segurança):
+    Por padrão, o projeto busca o banco de dados em `localhost:5432/rentflow`. Caso precise alterar ou queira rodar conectado ao seu banco, crie um arquivo chamado `application-local.properties` em `src/main/resources/` (este arquivo já está configurado no `.gitignore` por segurança):
     ```properties
     spring.datasource.url=jdbc:postgresql://seu-host:5432/seu-banco
     spring.datasource.username=seu-usuario
