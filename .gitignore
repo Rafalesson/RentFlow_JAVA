@@ -92,7 +92,11 @@ _bmad-output/
 # ========================
 design-artifacts/
 
-# ========================
 # Docs gerados (manter apenas se versionados intencionalmente)
 # ========================
 docs/generated/
+
+# ========================
+# Arquivos de Entrega / Compactados
+# ========================
+*.zip
