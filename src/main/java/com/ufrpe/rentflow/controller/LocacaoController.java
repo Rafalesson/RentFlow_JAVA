@@ -12,6 +12,9 @@ import com.ufrpe.rentflow.service.ClienteService;
 import com.ufrpe.rentflow.service.VeiculoService;
 import com.ufrpe.rentflow.service.SeguroService;
 import com.ufrpe.rentflow.service.FuncionarioService;
+import com.ufrpe.rentflow.model.entity.Vistoria;
+import com.ufrpe.rentflow.model.enums.TipoVistoria;
+import com.ufrpe.rentflow.service.VistoriaService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -32,17 +35,20 @@ public class LocacaoController {
     private final VeiculoService veiculoService;
     private final SeguroService seguroService;
     private final FuncionarioService funcionarioService;
+    private final VistoriaService vistoriaService;
 
-    public LocacaoController(LocacaoService locacaoService, 
+    public LocacaoController(LocacaoService locacaoService,
                              ClienteService clienteService,
-                             VeiculoService veiculoService, 
+                             VeiculoService veiculoService,
                              SeguroService seguroService,
-                             FuncionarioService funcionarioService) {
+                             FuncionarioService funcionarioService,
+                             VistoriaService vistoriaService) {
         this.locacaoService = locacaoService;
         this.clienteService = clienteService;
         this.veiculoService = veiculoService;
         this.seguroService = seguroService;
         this.funcionarioService = funcionarioService;
+        this.vistoriaService = vistoriaService;
     }
 
     @GetMapping
@@ -120,18 +126,46 @@ public class LocacaoController {
         return "redirect:/locacoes";
     }
 
-    @GetMapping("/retirar/{id}")
-    public String registrarRetirada(Principal principal, @PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+    @PostMapping("/retirar/{id}")
+    public String registrarRetirada(
+            Principal principal,
+            @PathVariable("id") Integer id,
+            @RequestParam("kmRetirada") Integer kmRetirada,
+            @RequestParam("nivelCombustivelRetirada") Short nivelCombustivel,
+            @RequestParam(
+                    value = "observacoesRetirada",
+                    required = false
+            ) String observacoes,
+            RedirectAttributes redirectAttributes
+    ) {
         if (principal == null) {
             return "redirect:/login";
         }
+
         try {
-            Funcionario logado = funcionarioService.obterPorLogin(principal.getName());
-            locacaoService.efetivarRetirada(id, logado);
-            redirectAttributes.addFlashAttribute("successMessage", "Veículo retirado com sucesso! Contrato ativo.");
+            Funcionario logado =
+                    funcionarioService.obterPorLogin(principal.getName());
+
+            locacaoService.efetivarRetirada(
+                    id,
+                    kmRetirada,
+                    nivelCombustivel,
+                    observacoes,
+                    logado
+            );
+
+            redirectAttributes.addFlashAttribute(
+                    "successMessage",
+                    "Veículo retirado com sucesso! Vistoria registrada."
+            );
+
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Erro ao registrar retirada: " + e.getMessage());
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Erro ao registrar retirada: " + e.getMessage()
+            );
         }
+
         return "redirect:/locacoes";
     }
 
@@ -139,18 +173,48 @@ public class LocacaoController {
     public String registrarDevolucao(
             Principal principal,
             @PathVariable("id") Integer id,
-            @RequestParam(value = "valorFinal", required = false) BigDecimal valorFinal,
-            RedirectAttributes redirectAttributes) {
+            @RequestParam("kmDevolucao") Integer kmDevolucao,
+            @RequestParam("nivelCombustivelDevolucao") Short nivelCombustivel,
+            @RequestParam(
+                    value = "observacoesDevolucao",
+                    required = false
+            ) String observacoes,
+            @RequestParam(
+                    value = "valorFinal",
+                    required = false
+            ) BigDecimal valorFinal,
+            RedirectAttributes redirectAttributes
+    ) {
         if (principal == null) {
             return "redirect:/login";
         }
+
         try {
-            Funcionario logado = funcionarioService.obterPorLogin(principal.getName());
-            locacaoService.efetivarDevolucao(id, valorFinal, logado);
-            redirectAttributes.addFlashAttribute("successMessage", "Devolução registrada com sucesso! Veículo liberado.");
+            Funcionario logado =
+                    funcionarioService.obterPorLogin(principal.getName());
+
+            locacaoService.efetivarDevolucao(
+                    id,
+                    kmDevolucao,
+                    nivelCombustivel,
+                    observacoes,
+                    valorFinal,
+                    logado
+            );
+
+            redirectAttributes.addFlashAttribute(
+                    "successMessage",
+                    "Devolução registrada com sucesso! "
+                            + "Vistoria salva e veículo liberado."
+            );
+
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Erro ao registrar devolução: " + e.getMessage());
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Erro ao registrar devolução: " + e.getMessage()
+            );
         }
+
         return "redirect:/locacoes";
     }
 
@@ -161,6 +225,16 @@ public class LocacaoController {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Locação não encontrada."));
         model.addAttribute("locacao", locacao);
+        Vistoria vistoriaRetirada = vistoriaService
+                .buscarPorLocacaoETipo(id, TipoVistoria.RETIRADA)
+                .orElse(null);
+
+        Vistoria vistoriaDevolucao = vistoriaService
+                .buscarPorLocacaoETipo(id, TipoVistoria.DEVOLUCAO)
+                .orElse(null);
+
+        model.addAttribute("vistoriaRetirada", vistoriaRetirada);
+        model.addAttribute("vistoriaDevolucao", vistoriaDevolucao);
         
         long totalDays = java.time.temporal.ChronoUnit.DAYS.between(
             locacao.getDataRetirada() != null ? locacao.getDataRetirada().toLocalDate() : locacao.getDataReserva().toLocalDate(),

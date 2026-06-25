@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<html lang="pt-BR"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
 <head>
     <title>Locações & Reservas | RentFlow</title>
 </head>
@@ -52,10 +56,10 @@
                         <label class="form-label text-secondary small fw-bold mb-2">Filtrar por Status</label>
                         <select name="status" onchange="this.form.submit()" class="form-select form-control-custom" style="padding-top:10px; padding-bottom:10px; padding-left:16px; background-image:none;">
                             <option value="" th:selected="${param.status == null || param.status[0] == ''}">Todos os Status</option>
-                            <option value="RESERVADA" th:selected="${param.status != null && param.status[0] == 'RESERVADA'}">Reservada</option>
-                            <option value="ATIVA" th:selected="${param.status != null && param.status[0] == 'ATIVA'}">Ativa</option>
-                            <option value="ENCERRADA" th:selected="${param.status != null && param.status[0] == 'ENCERRADA'}">Encerrada</option>
-                            <option value="CANCELADA" th:selected="${param.status != null && param.status[0] == 'CANCELADA'}">Cancelada</option>
+                            <option value="RESERVADA" th:selected="${param.status != null and param.status[0] == 'RESERVADA'}">Reservada</option>
+                            <option value="ATIVA" th:selected="${param.status != null and param.status[0] == 'ATIVA'}">Ativa</option>
+                            <option value="ENCERRADA" th:selected="${param.status != null and param.status[0] == 'ENCERRADA'}">Encerrada</option>
+                            <option value="CANCELADA" th:selected="${param.status != null and param.status[0] == 'CANCELADA'}">Cancelada</option>
                         </select>
                     </div>
                 </div>
@@ -76,8 +80,10 @@
                             <th>Custo Total</th>
                             <th class="text-center">Status</th>
                             <th sec:authorize="hasRole('GERENTE')" class="text-acoes-col">Ações</th>
-                            <th sec:authorize="!hasRole('GERENTE')" th:if="${#lists.toList(locacoes).?[status.name() == 'RESERVADA' or status.name() == 'ATIVA'].size() > 0}" class="text-acoes-col">Ações</th>
-                        </tr>
+                            <th sec:authorize="!hasRole('GERENTE')"
+                                class="text-acoes-col">
+                                Ações
+                            </th>
                     </thead>
                     <tbody>
                         <tr th:each="locacao : ${locacoes}" class="linha-clicavel" data-detalhes-tipo="locacao" th:data-detalhes-id="${locacao.idLoc}">
@@ -120,9 +126,15 @@
                             </td>
                             <td sec:authorize="hasRole('GERENTE')" class="text-acoes-col">
                                 <!-- Operacional: Efetivar Retirada (Check-out) -->
-                                <a th:if="${locacao.status.name() == 'RESERVADA'}" th:href="@{/locacoes/retirar/{id}(id=${locacao.idLoc})}" class="btn btn-sm btn-outline-success me-1 px-3 py-1 rounded-2" title="Registrar Retirada">
+                                <button th:if="${locacao.status.name() == 'RESERVADA'}"
+                                        type="button"
+                                        class="btn btn-sm btn-outline-success me-1 px-3 py-1 rounded-2"
+                                        title="Registrar Retirada"
+                                        data-bs-toggle="modal"
+                                        th:data-bs-target="${'#retiradaModal' + locacao.idLoc}">
+
                                     <i class="bi bi-box-arrow-up me-1"></i> Retirar
-                                </a>
+                                </button>
                                 <!-- Operacional: Registrar Devolução (Check-in) -->
                                 <button th:if="${locacao.status.name() == 'ATIVA'}" type="button" class="btn btn-sm btn-outline-info me-1 px-3 py-1 rounded-2" data-bs-toggle="modal" th:data-bs-target="${'#devolucaoModal' + locacao.idLoc}">
                                     <i class="bi bi-box-arrow-down me-1"></i> Devolver
@@ -136,11 +148,18 @@
                                     <i class="bi bi-trash-fill"></i>
                                 </button>
                             </td>
-                            <td sec:authorize="!hasRole('GERENTE')" th:if="${#lists.toList(locacoes).?[status.name() == 'RESERVADA' or status.name() == 'ATIVA'].size() > 0}" class="text-acoes-col">
+                            <td sec:authorize="!hasRole('GERENTE')"
+                                class="text-acoes-col">
                                 <!-- Operacional: Efetivar Retirada (Check-out) -->
-                                <a th:if="${locacao.status.name() == 'RESERVADA'}" th:href="@{/locacoes/retirar/{id}(id=${locacao.idLoc})}" class="btn btn-sm btn-outline-success me-1 px-3 py-1 rounded-2" title="Registrar Retirada">
+                                <button th:if="${locacao.status.name() == 'RESERVADA'}"
+                                        type="button"
+                                        class="btn btn-sm btn-outline-success me-1 px-3 py-1 rounded-2"
+                                        title="Registrar Retirada"
+                                        data-bs-toggle="modal"
+                                        th:data-bs-target="${'#retiradaModal' + locacao.idLoc}">
+
                                     <i class="bi bi-box-arrow-up me-1"></i> Retirar
-                                </a>
+                                </button>
                                 <!-- Operacional: Registrar Devolução (Check-in) -->
                                 <button th:if="${locacao.status.name() == 'ATIVA'}" type="button" class="btn btn-sm btn-outline-info me-1 px-3 py-1 rounded-2" data-bs-toggle="modal" th:data-bs-target="${'#devolucaoModal' + locacao.idLoc}">
                                     <i class="bi bi-box-arrow-down me-1"></i> Devolver
@@ -180,6 +199,107 @@
                                         </div>
                                     </div>
                                 </div>
+                                <!-- ======================= MODAL: RETIRADA DO VEÍCULO ======================= -->
+
+                                <div class="modal fade"
+                                     th:id="${'retiradaModal' + locacao.idLoc}"
+                                     tabindex="-1"
+                                     aria-hidden="true"
+                                     style="z-index: 1060;">
+
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+
+                                            <form th:action="@{/locacoes/retirar/{id}(id=${locacao.idLoc})}"
+                                                  method="POST">
+
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title text-white fw-bold">
+                                                        <i class="bi bi-box-arrow-up-fill text-success me-2"></i>
+                                                        Vistoria de Retirada
+                                                    </h5>
+
+                                                    <button type="button"
+                                                            class="btn-close"
+                                                            data-bs-dismiss="modal"
+                                                            aria-label="Close">
+                                                    </button>
+                                                </div>
+
+                                                <div class="modal-body text-start">
+
+                                                    <p class="text-white small mb-3">
+                                                        Veículo:
+                                                        <strong th:text="${locacao.veiculo?.marca + ' ' + locacao.veiculo?.modelo}">
+                                                            Veículo
+                                                        </strong>
+
+                                                        — Placa:
+                                                        <span th:text="${locacao.veiculo?.placa}">ABC1234</span>
+                                                    </p>
+
+                                                    <div class="row g-3">
+
+                                                        <div class="col-md-6">
+                                                            <label class="form-label-custom mb-1">
+                                                                Quilometragem na retirada
+                                                            </label>
+
+                                                            <input type="number"
+                                                                   name="kmRetirada"
+                                                                   class="form-control-custom"
+                                                                   min="0"
+                                                                   th:min="${locacao.veiculo?.kmAtual}"
+                                                                   th:value="${locacao.veiculo?.kmAtual}"
+                                                                   required>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label class="form-label-custom mb-1">
+                                                                Combustível na retirada (%)
+                                                            </label>
+
+                                                            <input type="number"
+                                                                   name="nivelCombustivelRetirada"
+                                                                   class="form-control-custom"
+                                                                   min="0"
+                                                                   max="100"
+                                                                   th:value="${locacao.veiculo?.nivelCombustivel}"
+                                                                   required>
+                                                        </div>
+
+                                                        <div class="col-12">
+                                                            <label class="form-label-custom mb-1">
+                                                                Observações
+                                                            </label>
+
+                                                            <textarea name="observacoesRetirada"
+                                                                      class="form-control-custom"
+                                                                      rows="3"
+                                                                      maxlength="500"
+                                                                      placeholder="Ex.: veículo sem avarias aparentes..."></textarea>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+
+                                                <div class="modal-footer">
+                                                    <button type="button"
+                                                            class="btn btn-cancel-custom"
+                                                            data-bs-dismiss="modal">
+                                                        Cancelar
+                                                    </button>
+
+                                                    <button type="submit"
+                                                            class="btn btn-success px-4">
+                                                        Confirmar Retirada
+                                                    </button>
+                                                </div>
+
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <!-- ======================= MODAL: DEVOLUÇÃO DO VEÍCULO ======================= -->
                                 <div class="modal fade" th:id="${'devolucaoModal' + locacao.idLoc}" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
@@ -193,6 +313,49 @@
                                                 <div class="modal-body text-start">
                                                     <p class="text-white small mb-3">Você está registrando a devolução do veículo <strong th:text="${locacao.veiculo?.marca + ' ' + locacao.veiculo?.modelo}">Gol</strong> (Placa: <span th:text="${locacao.veiculo?.placa}">ABC1023</span>) alugado por <strong th:text="${locacao.cliente?.nome}">Bruno</strong>.</p>
                                                     <div class="mb-3">
+                                                        <div class="row g-3 mb-3">
+
+                                                            <div class="col-md-6">
+                                                                <label class="form-label-custom mb-1">
+                                                                    Quilometragem na devolução
+                                                                </label>
+
+                                                                <input type="number"
+                                                                       name="kmDevolucao"
+                                                                       class="form-control-custom"
+                                                                       min="0"
+                                                                       th:min="${locacao.veiculo?.kmAtual}"
+                                                                       th:value="${locacao.veiculo?.kmAtual}"
+                                                                       required>
+                                                            </div>
+
+                                                            <div class="col-md-6">
+                                                                <label class="form-label-custom mb-1">
+                                                                    Combustível na devolução (%)
+                                                                </label>
+
+                                                                <input type="number"
+                                                                       name="nivelCombustivelDevolucao"
+                                                                       class="form-control-custom"
+                                                                       min="0"
+                                                                       max="100"
+                                                                       th:value="${locacao.veiculo?.nivelCombustivel}"
+                                                                       required>
+                                                            </div>
+
+                                                            <div class="col-12">
+                                                                <label class="form-label-custom mb-1">
+                                                                    Observações da devolução
+                                                                </label>
+
+                                                                <textarea name="observacoesDevolucao"
+                                                                          class="form-control-custom"
+                                                                          rows="3"
+                                                                          maxlength="500"
+                                                                          placeholder="Ex.: veículo devolvido sem novas avarias..."></textarea>
+                                                            </div>
+
+                                                        </div>
                                                         <label class="form-label-custom mb-1">Custo Final Cobrado (R$)</label>
                                                         <div class="input-group input-group-custom number-input-group">
                                                             <button class="btn btn-outline-secondary btn-number" type="button" data-action="minus"><i class="bi bi-dash"></i></button>
@@ -264,7 +427,11 @@
                                         <label class="form-label-custom mb-1">Veículos Disponíveis no Pátio</label>
                                         <select name="placaVeiculo" class="form-select form-control-custom" style="padding: 10px 16px 10px 16px!important; background-image:none;" required>
                                             <option value="">Selecione um veículo...</option>
-                                            <option th:each="vei : ${veiculos}" th:value="${vei.placa}" th:data-valor-diaria="${vei.categoria?.valorDiaria}" th:text="${vei.marca + ' ' + vei.modelo + ' (Placa: ' + vei.placa + ' - Diária: R$ ' + #numbers.formatDecimal(vei.categoria?.valorDiaria != null ? vei.categoria.valorDiaria : 0.0, 1, 'POINT', 2, 'COMMA') + ')'}"></option>
+                                            <option th:each="vei : ${veiculos}"
+                                                    th:value="${vei.placa}"
+                                                    th:data-valor-diaria="${vei.categoria != null ? vei.categoria.valorDiaria : 0}"
+                                                    th:text="${vei.marca + ' ' + vei.modelo + ' (Placa: ' + vei.placa + ')'}">
+                                            </option>
                                         </select>
                                     </div>
                                 </div>
@@ -280,7 +447,11 @@
                                         <label class="form-label-custom mb-1">Opção de Seguro</label>
                                         <select name="idSeguro" class="form-select form-control-custom" style="padding: 10px 16px 10px 16px!important; background-image:none;" required>
                                             <option value="">Selecione um seguro...</option>
-                                            <option th:each="seg : ${seguros}" th:value="${seg.idSeguro}" th:data-valor-diario="${seg.valorDiario}" th:text="${seg.nome + ' (Diário: R$ ' + #numbers.formatDecimal(seg.valorDiario != null ? seg.valorDiario : 0.0, 1, 'POINT', 2, 'COMMA') + ')'}"></option>
+                                            <option th:each="seg : ${seguros}"
+                                                    th:value="${seg.idSeguro}"
+                                                    th:data-valor-diario="${seg.valorDiario}"
+                                                    th:text="${seg.nome}">
+                                            </option>
                                         </select>
                                     </div>
                                     <div class="col-md-6">
