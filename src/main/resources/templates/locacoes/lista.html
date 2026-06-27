@@ -356,6 +356,31 @@
                                                             </div>
 
                                                         </div>
+                                                        <!-- Programa de Fidelidade -->
+                                                        <div class="mb-3"
+                                                             th:with="saldo=${saldoPontosPorLocacao[locacao.idLoc] != null? saldoPontosPorLocacao[locacao.idLoc]: 0},limite=${saldo - (saldo % 100)}">
+                                                            <label class="form-label-custom mb-1">Pontos de fidelidade</label>
+                                                            <div class="small text-secondary mb-2">Saldo disponível:
+                                                                <span class="text-warning fw-bold" th:text="${saldo}">0</span>pontos
+                                                            </div>
+                                                            <select name="pontosUtilizados"
+                                                                    class="form-select form-control-custom">
+                                                                <option value="0">
+                                                                    Não utilizar pontos
+                                                                </option>
+                                                                <th:block th:if="${saldo >= 100}">
+                                                                    <option th:each="pontos : ${#numbers.sequence(100, limite, 100)}"
+                                                                            th:value="${pontos}"
+                                                                            th:text="${pontos+ ' pontos — R$ '+ ((pontos / 100) * 20)+ ',00 de desconto'}">100 pontos — R$ 20,00 de desconto</option>
+                                                                </th:block>
+                                                            </select>
+
+                                                            <div class="small text-secondary mt-2"
+                                                                 th:if="${saldo < 100}">
+                                                                O cliente precisa de pelo menos 100 pontos para obter desconto.
+                                                            </div>
+
+                                                        </div>
                                                         <label class="form-label-custom mb-1">Custo Final Cobrado (R$)</label>
                                                         <div class="input-group input-group-custom number-input-group">
                                                             <button class="btn btn-outline-secondary btn-number" type="button" data-action="minus"><i class="bi bi-dash"></i></button>
