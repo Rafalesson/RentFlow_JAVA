@@ -2071,5 +2071,32 @@ body.light-theme .btn-toggle-sidebar:hover {
         margin: 0.75rem !important;
     }
 }
+/* Rolagem exclusiva e integrada da página de relatórios */
+.relatorios-page {
+    height: 100vh;
+    min-height: 0;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    padding-bottom: 80px;
+    box-sizing: border-box;
 
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+}
 
+.relatorios-page::-webkit-scrollbar {
+    width: 8px;
+}
+
+.relatorios-page::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.relatorios-page::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.35);
+    border-radius: 10px;
+}
+
+.relatorios-page::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.55);
+}

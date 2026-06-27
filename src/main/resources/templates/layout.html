@@ -112,6 +112,11 @@
                 <a th:href="@{/locacoes}" class="nav-item-custom" th:classappend="${activePage == 'locacoes' ? 'active' : ''}">
                     <i class="bi bi-key-fill nav-icon-custom"></i> Locações
                 </a>
+                <a th:href="@{/relatorios}"
+                   class="nav-item-custom"
+                   th:classappend="${activePage == 'relatorios' ? 'active' : ''}">
+                    <i class="bi bi-bar-chart-fill nav-icon-custom"></i> Relatórios
+                </a>
                 <a th:href="@{/manutencoes}" class="nav-item-custom" th:classappend="${activePage == 'manutencoes' ? 'active' : ''}">
                     <i class="bi bi-tools nav-icon-custom"></i> Manutenções
                 </a>
@@ -138,6 +143,7 @@
         <!-- Área de Conteúdo Principal -->
         <main class="main-content-wrapper flex-grow-1 d-flex flex-column">
             <div class="container-fluid" layout:fragment="content">
+
                 <!-- Conteúdo das telas filhas -->
             </div>
 

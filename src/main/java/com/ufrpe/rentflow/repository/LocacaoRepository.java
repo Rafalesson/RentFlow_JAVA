@@ -9,6 +9,7 @@ import java.util.List;
 public interface LocacaoRepository extends JpaRepository<Locacao, Integer> {
     List<Locacao> findByStatus(StatusLocacao status);
     List<Locacao> findByCliente_Cpf(String cpf);
+    List<Locacao> findByCliente_CpfOrderByDataReservaDesc(String cpf);
 
     @org.springframework.data.jpa.repository.Query("SELECT l FROM Locacao l WHERE " +
            "(:filtrarBusca = false OR " +
