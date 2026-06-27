@@ -73,7 +73,8 @@
                         <div class="detail-label">Nome do Seguro</div>
                         <div class="detail-value" th:text="${locacao.seguro?.nome}">Básico</div>
                     </div>
-                    <span class="badge detail-badge-indigo font-monospace px-3 py-2 rounded-2" th:text="${'R$ ' + #numbers.formatDecimal(locacao.seguro?.valorDiario != null ? locacao.seguro.valorDiario : 0.0, 1, 'POINT', 2, 'COMMA') + ' / dia'}">R$ 15.00 / dia</span>
+                    <span class="badge detail-badge-indigo font-monospace px-3 py-2 rounded-2"
+                          th:text="${locacao.seguro != null? 'R$ ' + locacao.seguro.valorDiario + ' / dia': 'R$ 0,00 / dia'}">R$ 0,00 / dia</span>
                 </div>
                 <div class="col-12 mt-2">
                     <div class="detail-label">Cobertura</div>
@@ -117,8 +118,8 @@
                         </div>
                         <!-- Box de Estado da Retirada -->
                         <div class="p-2 rounded-2 detail-status-box d-flex justify-content-between align-items-center small">
-                            <span class="text-white-50">KM: <strong class="text-white" th:text="${(locacao.veiculo?.kmAtual - 350) + ' KM'}">45000 KM</strong></span>
-                            <span class="text-white-50">Combustível: <strong class="text-success">100%</strong></span>
+                            <span class="text-white-50">KM:<strong class="text-white" th:text="${vistoriaRetirada != null ? vistoriaRetirada.km + ' KM' : '-'}">-</strong></span>
+                            <span class="text-white-50">Combustível:<strong class="text-success" th:text="${vistoriaRetirada != null ? vistoriaRetirada.nivelCombustivel + '%' : '-'}">-</strong></span>
                         </div>
                     </div>
 
@@ -135,8 +136,8 @@
                         </div>
                         <!-- Box de Estado da Devolução -->
                         <div class="p-2 rounded-2 detail-status-box d-flex justify-content-between align-items-center small">
-                            <span class="text-white-50">KM: <strong class="text-white" th:text="${locacao.veiculo?.kmAtual + ' KM'}">45350 KM</strong></span>
-                            <span class="text-white-50">Combustível: <strong class="text-white" th:text="${locacao.veiculo?.nivelCombustivel + '%'}">75%</strong></span>
+                            <span class="text-white-50">KM:<strong class="text-white" th:text="${vistoriaDevolucao != null? vistoriaDevolucao.km + ' KM': '-'}">-</strong></span>
+                            <span class="text-white-50">Combustível:<strong class="text-white" th:text="${vistoriaDevolucao != null? vistoriaDevolucao.nivelCombustivel + '%': '-'}">-</strong></span>
                         </div>
                     </div>
 
@@ -172,7 +173,8 @@
 
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <span class="text-white fw-bold">Valor Total:</span>
-                    <span class="fs-4 fw-bold font-monospace detail-total-value" th:text="${'R$ ' + #numbers.formatDecimal(locacao.valorTotal != null ? locacao.valorTotal : 0.0, 1, 'POINT', 2, 'COMMA')}">R$ 285,00</span>
+                    <span class="fs-4 fw-bold font-monospace detail-total-value"
+                          th:text="${locacao.valorTotal != null? 'R$ ' + locacao.valorTotal: 'R$ 0,00'}">R$ 0,00</span>
                 </div>
 
                 <!-- Status do Pagamento (só mostra se ENCERRADA) -->
@@ -203,6 +205,10 @@
     </div>
 </div>
 
-<div class="modal-footer border-top-0 pt-0">
-    <button type="button" class="btn btn-primary px-4 rounded-2" data-bs-dismiss="modal">Fechar Detalhes</button>
-</div>
+    <div class="modal-footer border-top-0 pt-0">
+        <button type="button"
+                class="btn btn-primary px-4 rounded-2"
+                data-bs-dismiss="modal">
+            Fechar Detalhes
+        </button>
+    </div>
