@@ -102,6 +102,65 @@
 
     </div>
 
+    <!-- Seleção do veículo -->
+    <div class="glass-card p-4 mb-4">
+
+        <h5 class="text-white fw-bold mb-3">
+            <i class="bi bi-car-front-fill text-primary me-2"></i>
+            Histórico do Veículo
+        </h5>
+
+        <form method="GET"
+              th:action="@{/relatorios}">
+
+            <div class="row g-3 align-items-end">
+
+                <div class="col-md-9">
+
+                    <label class="form-label-custom mb-2">
+                        Selecione um veículo
+                    </label>
+
+                    <select name="placa"
+                            class="form-select form-control-custom"
+                            required>
+
+                        <option value="">
+                            Selecione um veículo...
+                        </option>
+
+                        <option th:each="veiculo : ${veiculos}"
+                                th:value="${veiculo.placa}"
+                                th:selected="${placaSelecionada == veiculo.placa}"
+                                th:text="${veiculo.marca
+                                + ' '
+                                + veiculo.modelo
+                                + ' — Placa: '
+                                + veiculo.placa}">
+                            Veículo
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <button type="submit"
+                            class="btn btn-primary-custom w-100">
+
+                        <i class="bi bi-search me-2"></i>
+                        Gerar Relatório
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
     <!-- Resultado do relatório -->
     <div th:if="${relatorioCliente != null}">
 
@@ -417,7 +476,244 @@
 
     </div>
 
+    <!-- Resultado do relatório do veículo -->
+    <div th:if="${relatorioVeiculo != null}">
+
+        <!-- Identificação do veículo -->
+        <div class="glass-card p-4 mb-4">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+                    <h4 class="text-white fw-bold mb-1"
+                        th:text="${relatorioVeiculo.veiculo.marca
+                        + ' '
+                        + relatorioVeiculo.veiculo.modelo}">
+                        Fiat Uno
+                    </h4>
+
+                    <p class="text-secondary mb-0">
+                        Placa:
+                        <span class="font-monospace"
+                              th:text="${relatorioVeiculo.veiculo.placa}">
+                        ABC1D23
+                    </span>
+                    </p>
+                </div>
+
+                <i class="bi bi-car-front-fill text-primary fs-2"></i>
+
+            </div>
+
+        </div>
+
+        <!-- Indicadores do veículo -->
+        <div class="row g-3 mb-4">
+
+            <div class="col-md-3">
+                <div class="glass-card p-4 h-100">
+
+                    <div class="text-secondary small fw-bold mb-2">
+                        TOTAL DE LOCAÇÕES
+                    </div>
+
+                    <div class="fs-2 text-white fw-bold"
+                         th:text="${relatorioVeiculo.totalLocacoes}">
+                        0
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="glass-card p-4 h-100">
+
+                    <div class="text-secondary small fw-bold mb-2">
+                        LOCAÇÕES ENCERRADAS
+                    </div>
+
+                    <div class="fs-2 text-success fw-bold"
+                         th:text="${relatorioVeiculo.locacoesEncerradas}">
+                        0
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="glass-card p-4 h-100">
+
+                    <div class="text-secondary small fw-bold mb-2">
+                        KM PERCORRIDOS
+                    </div>
+
+                    <div class="fs-4 text-info fw-bold">
+                    <span th:text="${relatorioVeiculo.quilometrosPercorridosTotal}">
+                        0
+                    </span>
+                        KM
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="glass-card p-4 h-100">
+
+                    <div class="text-secondary small fw-bold mb-2">
+                        RECEITA GERADA
+                    </div>
+
+                    <div class="fs-4 text-warning fw-bold"
+                         th:text="${'R$ ' + relatorioVeiculo.receitaTotal}">
+                        R$ 0,00
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Indicador de combustível -->
+        <div class="glass-card p-4 mb-4">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+                    <div class="text-secondary small fw-bold mb-1">
+                        COMBUSTÍVEL CONSUMIDO REGISTRADO
+                    </div>
+
+                    <div class="fs-4 text-danger fw-bold">
+                    <span th:text="${relatorioVeiculo.combustivelConsumidoTotal}">
+                        0
+                    </span>
+                        pontos percentuais
+                    </div>
+                </div>
+
+                <i class="bi bi-fuel-pump-fill text-danger fs-2"></i>
+
+            </div>
+
+        </div>
+
+        <!-- Histórico do veículo -->
+        <div class="glass-card p-4 mb-4">
+
+            <h5 class="text-white fw-bold mb-4">
+                <i class="bi bi-clock-history text-primary me-2"></i>
+                Histórico de Utilização do Veículo
+            </h5>
+
+            <div class="table-responsive">
+
+                <table class="table table-dark-custom table-hover align-middle">
+
+                    <thead>
+                    <tr>
+                        <th>Locação</th>
+                        <th>Cliente</th>
+                        <th>KM Retirada</th>
+                        <th>KM Devolução</th>
+                        <th>KM Percorridos</th>
+                        <th>Combustível</th>
+                        <th>Status</th>
+                        <th>Valor</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="item : ${relatorioVeiculo.historico}">
+
+                        <td class="font-monospace text-danger fw-bold"
+                            th:text="${'#' + item.locacao.idLoc}">
+                            #1
+                        </td>
+
+                        <td>
+                            <div class="text-white fw-bold"
+                                 th:text="${item.locacao.cliente.nome}">
+                                Cliente
+                            </div>
+
+                            <div class="small text-secondary font-monospace"
+                                 th:text="${item.locacao.cliente.cpf}">
+                                000.000.000-00
+                            </div>
+                        </td>
+
+                        <td th:text="${item.vistoriaRetirada != null
+                        ? item.vistoriaRetirada.km + ' KM'
+                        : '-'}">
+                            -
+                        </td>
+
+                        <td th:text="${item.vistoriaDevolucao != null
+                        ? item.vistoriaDevolucao.km + ' KM'
+                        : '-'}">
+                            -
+                        </td>
+
+                        <td class="text-info fw-bold"
+                            th:text="${item.quilometrosPercorridos + ' KM'}">
+                            0 KM
+                        </td>
+
+                        <td>
+                        <span th:if="${item.vistoriaRetirada != null
+                            && item.vistoriaDevolucao != null}"
+                              th:text="${item.vistoriaRetirada.nivelCombustivel
+                                  + '% → '
+                                  + item.vistoriaDevolucao.nivelCombustivel
+                                  + '%'}">
+                            100% → 50%
+                        </span>
+
+                            <span th:unless="${item.vistoriaRetirada != null
+                            && item.vistoriaDevolucao != null}">
+                            -
+                        </span>
+                        </td>
+
+                        <td th:text="${item.locacao.status}">
+                            ENCERRADA
+                        </td>
+
+                        <td class="text-success fw-bold"
+                            th:text="${item.locacao.valorTotal != null
+                            ? 'R$ ' + item.locacao.valorTotal
+                            : 'R$ 0,00'}">
+                            R$ 0,00
+                        </td>
+
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(relatorioVeiculo.historico)}">
+
+                        <td colspan="8"
+                            class="text-center text-secondary py-5">
+
+                            <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+
+                            Este veículo ainda não possui locações.
+
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
 </main>
+
 
 </body>
 </html>
