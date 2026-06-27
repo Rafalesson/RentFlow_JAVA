@@ -15,6 +15,7 @@ import com.ufrpe.rentflow.service.FuncionarioService;
 import com.ufrpe.rentflow.model.entity.Vistoria;
 import com.ufrpe.rentflow.model.enums.TipoVistoria;
 import com.ufrpe.rentflow.service.VistoriaService;
+import com.ufrpe.rentflow.service.FidelidadeService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,9 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
 
 @Controller
 @RequestMapping("/locacoes")
@@ -36,19 +40,21 @@ public class LocacaoController {
     private final SeguroService seguroService;
     private final FuncionarioService funcionarioService;
     private final VistoriaService vistoriaService;
+    private final FidelidadeService fidelidadeService;
 
     public LocacaoController(LocacaoService locacaoService,
                              ClienteService clienteService,
                              VeiculoService veiculoService,
                              SeguroService seguroService,
                              FuncionarioService funcionarioService,
-                             VistoriaService vistoriaService) {
+                             VistoriaService vistoriaService, FidelidadeService fidelidadeService) {
         this.locacaoService = locacaoService;
         this.clienteService = clienteService;
         this.veiculoService = veiculoService;
         this.seguroService = seguroService;
         this.funcionarioService = funcionarioService;
         this.vistoriaService = vistoriaService;
+        this.fidelidadeService = fidelidadeService;
     }
 
     @GetMapping
@@ -56,14 +62,36 @@ public class LocacaoController {
             @RequestParam(value = "busca", required = false) String busca,
             @RequestParam(value = "status", required = false) StatusLocacao status,
             Model model) {
-            
-        model.addAttribute("locacoes", locacaoService.filtrar(busca, status));
+
+        List<Locacao> locacoes = locacaoService.filtrar(busca, status);
+
+        model.addAttribute("locacoes", locacoes);
         model.addAttribute("clientes", clienteService.listarTodos());
         model.addAttribute("veiculos", veiculoService.listarPorStatus(StatusVeiculo.DISPONIVEL));
         model.addAttribute("seguros", seguroService.listarTodos());
         model.addAttribute("statusList", StatusLocacao.values());
         model.addAttribute("title", "Locações & Reservas | RentFlow");
         model.addAttribute("activePage", "locacoes");
+
+        Map<Integer, Integer> saldoPontosPorLocacao = new HashMap<>();
+
+        for (Locacao locacao : locacoes) {
+            if (locacao.getCliente() != null) {
+                int saldo = fidelidadeService.calcularSaldo(
+                        locacao.getCliente().getCpf()
+                );
+
+                saldoPontosPorLocacao.put(
+                        locacao.getIdLoc(),
+                        saldo
+                );
+            }
+        }
+
+        model.addAttribute(
+                "saldoPontosPorLocacao",
+                saldoPontosPorLocacao
+        );
         return "locacoes/lista";
     }
 
@@ -172,17 +200,35 @@ public class LocacaoController {
     @PostMapping("/devolver/{id}")
     public String registrarDevolucao(
             Principal principal,
-            @PathVariable("id") Integer id,
-            @RequestParam("kmDevolucao") Integer kmDevolucao,
-            @RequestParam("nivelCombustivelDevolucao") Short nivelCombustivel,
+
+            @PathVariable("id")
+            Integer id,
+
+            @RequestParam("kmDevolucao")
+            Integer kmDevolucao,
+
+            @RequestParam("nivelCombustivelDevolucao")
+            Short nivelCombustivel,
+
             @RequestParam(
                     value = "observacoesDevolucao",
                     required = false
-            ) String observacoes,
+            )
+            String observacoes,
+
             @RequestParam(
                     value = "valorFinal",
                     required = false
-            ) BigDecimal valorFinal,
+            )
+            BigDecimal valorFinal,
+
+            @RequestParam(
+                    value = "pontosUtilizados",
+                    required = false,
+                    defaultValue = "0"
+            )
+            Integer pontosUtilizados,
+
             RedirectAttributes redirectAttributes
     ) {
         if (principal == null) {
@@ -199,6 +245,7 @@ public class LocacaoController {
                     nivelCombustivel,
                     observacoes,
                     valorFinal,
+                    pontosUtilizados,
                     logado
             );
 

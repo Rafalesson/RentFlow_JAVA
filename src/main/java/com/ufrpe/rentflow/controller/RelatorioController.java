@@ -6,6 +6,7 @@ import com.ufrpe.rentflow.model.dto.RelatorioVeiculoDTO;
 import com.ufrpe.rentflow.service.ClienteService;
 import com.ufrpe.rentflow.service.RelatorioService;
 import com.ufrpe.rentflow.service.VeiculoService;
+import com.ufrpe.rentflow.service.FidelidadeService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,15 +20,17 @@ public class RelatorioController {
     private final RelatorioService relatorioService;
     private final ClienteService clienteService;
     private final VeiculoService veiculoService;
+    private final FidelidadeService fidelidadeService;
 
     public RelatorioController(
             RelatorioService relatorioService,
             ClienteService clienteService,
-            VeiculoService veiculoService
+            VeiculoService veiculoService, FidelidadeService fidelidadeService
     ) {
         this.relatorioService = relatorioService;
         this.clienteService = clienteService;
         this.veiculoService = veiculoService;
+        this.fidelidadeService = fidelidadeService;
     }
 
     @GetMapping
@@ -80,6 +83,15 @@ public class RelatorioController {
                 model.addAttribute(
                         "relatorioCliente",
                         relatorioCliente
+                );
+                model.addAttribute(
+                        "saldoPontos",
+                        fidelidadeService.calcularSaldo(cpf)
+                );
+
+                model.addAttribute(
+                        "historicoPontos",
+                        fidelidadeService.listarHistorico(cpf)
                 );
 
             } catch (RegraNegocioException e) {

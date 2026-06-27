@@ -25,16 +25,18 @@ public class LocacaoService {
     private final LocacaoRepository locacaoRepository;
     private final VeiculoRepository veiculoRepository;
     private final VistoriaService vistoriaService;
+    private final FidelidadeService fidelidadeService;
 
     // Injeção de Dependências via Construtor
     public LocacaoService(
             LocacaoRepository locacaoRepository,
             VeiculoRepository veiculoRepository,
-            VistoriaService vistoriaService
+            VistoriaService vistoriaService, FidelidadeService fidelidadeService
     ) {
         this.locacaoRepository = locacaoRepository;
         this.veiculoRepository = veiculoRepository;
         this.vistoriaService = vistoriaService;
+        this.fidelidadeService = fidelidadeService;
     }
 
     @Transactional
@@ -183,11 +185,14 @@ public class LocacaoService {
             Short nivelCombustivel,
             String observacoes,
             BigDecimal custoFinal,
+            Integer pontosUtilizados,
             Funcionario operador
     ) {
         Locacao locacao = locacaoRepository.findById(id)
                 .orElseThrow(() ->
-                        new RegraNegocioException("Locação não encontrada.")
+                        new RegraNegocioException(
+                                "Locação não encontrada."
+                        )
                 );
 
         if (locacao.getStatus() != StatusLocacao.ATIVA) {
@@ -208,33 +213,45 @@ public class LocacaoService {
             );
         }
 
-        Vistoria vistoriaRetirada = vistoriaService
-                .buscarPorLocacaoETipo(
-                        id,
-                        TipoVistoria.RETIRADA
-                )
-                .orElseThrow(() ->
-                        new RegraNegocioException(
-                                "A vistoria de retirada não foi encontrada."
-                        )
-                );
+        if (custoFinal == null
+                || custoFinal.compareTo(BigDecimal.ZERO) <= 0) {
 
-        if (kmDevolucao < vistoriaRetirada.getKm()) {
+            throw new RegraNegocioException(
+                    "Informe um valor final válido para a locação."
+            );
+        }
+
+        Veiculo veiculo = locacao.getVeiculo();
+
+        if (veiculo.getKmAtual() != null
+                && kmDevolucao < veiculo.getKmAtual()) {
+
             throw new RegraNegocioException(
                     "A quilometragem da devolução não pode ser menor "
-                            + "que a quilometragem registrada na retirada."
+                            + "que a quilometragem atual do veículo."
             );
         }
 
-        if (custoFinal != null && custoFinal.signum() < 0) {
-            throw new RegraNegocioException(
-                    "O valor final da locação não pode ser negativo."
-            );
+        BigDecimal valorComDesconto = custoFinal;
+
+        if (pontosUtilizados != null && pontosUtilizados > 0) {
+
+            BigDecimal desconto =
+                    fidelidadeService.resgatarPontosParaLocacao(
+                            locacao,
+                            pontosUtilizados
+                    );
+
+            if (desconto.compareTo(custoFinal) > 0) {
+                throw new RegraNegocioException(
+                        "O desconto não pode ser maior que o valor da locação."
+                );
+            }
+
+            valorComDesconto = custoFinal.subtract(desconto);
         }
 
-        /*
-         * Registra o estado do veículo no momento da devolução.
-         */
+        // Registra a vistoria de devolução
         vistoriaService.registrarVistoria(
                 locacao,
                 operador,
@@ -244,22 +261,22 @@ public class LocacaoService {
                 observacoes
         );
 
+        // Encerra a locação
         locacao.setStatus(StatusLocacao.ENCERRADA);
         locacao.setDataDevolReal(OffsetDateTime.now());
         locacao.setFuncionarioDevolucao(operador);
+        locacao.setValorTotal(valorComDesconto);
 
-        if (custoFinal != null) {
-            locacao.setValorTotal(custoFinal);
-        }
-
-        Veiculo veiculo = locacao.getVeiculo();
-
+        // Atualiza e libera o veículo
         veiculo.setKmAtual(kmDevolucao);
         veiculo.setNivelCombustivel(nivelCombustivel);
         veiculo.setStatus(StatusVeiculo.DISPONIVEL);
 
         veiculoRepository.save(veiculo);
         locacaoRepository.save(locacao);
+
+        // Gera pontos sobre o valor realmente pago
+        fidelidadeService.creditarPontosPorLocacao(id);
     }
 
     @Transactional
